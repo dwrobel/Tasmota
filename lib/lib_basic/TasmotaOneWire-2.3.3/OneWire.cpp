@@ -33,9 +33,6 @@ OneWire is now very mature code.  No changes other than adding
 definitions for newer hardware support are anticipated.
 
 =======
-Version 2.3.3 Tasmota 26JAN2024
-  Add support for Shelly Add-On by Theo Arends
-
 Version 2.3.3 Tasmota 15AUG2023
   Add support for ESP32 Arduino core 3 by @Jason2866
 
@@ -322,16 +319,13 @@ void directModeOutput(IO_REG_TYPE pin)
 
 #endif
 
-void OneWire::begin(uint8_t pin) {
+
+
+void OneWire::begin(uint8_t pin)
+{
     pinMode(pin, INPUT);
     bitmask = PIN_TO_BITMASK(pin);
     baseReg = PIN_TO_BASEREG(pin);
-    dual_mode = false; //(pin_out > -1);
-//    if (dual_mode) {
-//      pinMode(pin_out, OUTPUT);
-//      bitmask_out = PIN_TO_BITMASK(pin_out);
-//      baseReg_out = PIN_TO_BASEREG(pin_out);
-//    }
 #if ONEWIRE_SEARCH
     reset_search();
 #endif
@@ -352,7 +346,6 @@ uint8_t CRIT_TIMING OneWire::reset(void)
   uint8_t r;
   uint8_t retries = 125;
 
-  if (!dual_mode) {
     t_noInterrupts();
     DIRECT_MODE_INPUT(reg, mask);
     t_interrupts();
@@ -363,41 +356,16 @@ uint8_t CRIT_TIMING OneWire::reset(void)
         delayMicroseconds(2);
     } while ( !DIRECT_READ(reg, mask));
  
+    delayMicroseconds(ONEWIRE_TIME_G);
     t_noInterrupts();
     DIRECT_WRITE_LOW(reg, mask);
     DIRECT_MODE_OUTPUT(reg, mask);  // drive output low
-    delayMicroseconds(480);
+    delayMicroseconds(ONEWIRE_TIME_H);
     DIRECT_MODE_INPUT(reg, mask);   // allow it to float
-    delayMicroseconds(70);
+    delayMicroseconds(ONEWIRE_TIME_I);
     r = !DIRECT_READ(reg, mask);
     t_interrupts();
-
-    delayMicroseconds(410);
-  } else {
-    IO_REG_TYPE mask_out IO_REG_MASK_ATTR = bitmask_out;
-    volatile IO_REG_TYPE *reg_out IO_REG_BASE_ATTR = baseReg_out;
-
-    t_noInterrupts();
-    DIRECT_WRITE_HIGH(reg_out, mask_out);
-    t_interrupts();
-
-    // wait until the wire is high... just in case
-    do {
-        if (--retries == 0) return 0;
-        delayMicroseconds(2);
-    } while ( !DIRECT_READ(reg, mask));
- 
-    t_noInterrupts();
-    DIRECT_WRITE_LOW(reg_out, mask_out);
-    delayMicroseconds(480);
-    DIRECT_WRITE_HIGH(reg_out, mask_out);
-    delayMicroseconds(70);
-    r = !DIRECT_READ(reg, mask);
-    t_interrupts();
-
-    delayMicroseconds(410);
-  }
-
+    delayMicroseconds(ONEWIRE_TIME_J);
   return r;
 }
 
@@ -405,49 +373,30 @@ uint8_t CRIT_TIMING OneWire::reset(void)
 // Write a bit. Port and bit is used to cut lookup time and provide
 // more certain timing.
 //
-void CRIT_TIMING OneWire::write_bit(uint8_t v)
+void CRIT_TIMING OneWire::write_bit(uint8_t v, uint8_t power)
 {
 	IO_REG_TYPE mask IO_REG_MASK_ATTR = bitmask;
 	volatile IO_REG_TYPE *reg IO_REG_BASE_ATTR = baseReg;
 
-  if (!dual_mode) {
     if (v & 1) {
           t_noInterrupts();
       DIRECT_WRITE_LOW(reg, mask);
       DIRECT_MODE_OUTPUT(reg, mask);	// drive output low
-      delayMicroseconds(10);
+      delayMicroseconds(ONEWIRE_TIME_A);
+      if (!power) DIRECT_MODE_INPUT(reg, mask); // allow it to float
       DIRECT_WRITE_HIGH(reg, mask);	// drive output high
           t_interrupts();
-      delayMicroseconds(55);
+      delayMicroseconds(ONEWIRE_TIME_B);
     } else {
           t_noInterrupts();
       DIRECT_WRITE_LOW(reg, mask);
       DIRECT_MODE_OUTPUT(reg, mask);	// drive output low
-      delayMicroseconds(65);
+      delayMicroseconds(ONEWIRE_TIME_C);
+      if (!power) DIRECT_MODE_INPUT(reg, mask); // allow it to float
       DIRECT_WRITE_HIGH(reg, mask);	// drive output high
           t_interrupts();
-      delayMicroseconds(5);
+      delayMicroseconds(ONEWIRE_TIME_D);
     }
-  } else {
-    IO_REG_TYPE mask_out IO_REG_MASK_ATTR = bitmask_out;
-    volatile IO_REG_TYPE *reg_out IO_REG_BASE_ATTR = baseReg_out;
-
-    if (v & 1) {
-          t_noInterrupts();
-      DIRECT_WRITE_LOW(reg_out, mask_out);
-      delayMicroseconds(10);
-      DIRECT_WRITE_HIGH(reg_out, mask_out);	// drive output high
-          t_interrupts();
-      delayMicroseconds(55);
-    } else {
-          t_noInterrupts();
-      DIRECT_WRITE_LOW(reg_out, mask_out);
-      delayMicroseconds(65);
-      DIRECT_WRITE_HIGH(reg_out, mask_out);	// drive output high
-          t_interrupts();
-      delayMicroseconds(5);
-    }
-  }
 }
 
 //
@@ -460,29 +409,15 @@ uint8_t CRIT_TIMING OneWire::read_bit(void)
 	volatile IO_REG_TYPE *reg IO_REG_BASE_ATTR = baseReg;
 	uint8_t r;
 
-  if (!dual_mode) {
       t_noInterrupts();
     DIRECT_MODE_OUTPUT(reg, mask);
     DIRECT_WRITE_LOW(reg, mask);
-    delayMicroseconds(3);
+    delayMicroseconds(ONEWIRE_TIME_A);
     DIRECT_MODE_INPUT(reg, mask);	// let pin float, pull up will raise
-    delayMicroseconds(10);
+    delayMicroseconds(ONEWIRE_TIME_E);
     r = DIRECT_READ(reg, mask);
       t_interrupts();
-    delayMicroseconds(53);
-  } else {
-    IO_REG_TYPE mask_out IO_REG_MASK_ATTR = bitmask_out;
-    volatile IO_REG_TYPE *reg_out IO_REG_BASE_ATTR = baseReg_out;
-
-      t_noInterrupts();
-    DIRECT_WRITE_LOW(reg_out, mask_out);
-    delayMicroseconds(3);
-    DIRECT_WRITE_HIGH(reg_out, mask_out);
-    delayMicroseconds(10);
-    r = DIRECT_READ(reg, mask);
-      t_interrupts();
-    delayMicroseconds(53);
-  }
+    delayMicroseconds(ONEWIRE_TIME_F);
 	return r;
 }
 
@@ -497,37 +432,13 @@ void OneWire::write(uint8_t v, uint8_t power /* = 0 */) {
   uint8_t bitMask;
 
   for (bitMask = 0x01; bitMask; bitMask <<= 1) {
-    OneWire::write_bit( (bitMask & v)?1:0);
-  }
-  if ( !power) {
-    if (!dual_mode) {
-      t_noInterrupts();
-      DIRECT_MODE_INPUT(baseReg, bitmask);
-      DIRECT_WRITE_LOW(baseReg, bitmask);
-      t_interrupts();
-    } else {
-//      t_noInterrupts();
-//      DIRECT_WRITE_LOW(baseReg_out, bitmask_out);
-//      t_interrupts();
-    }      
+    OneWire::write_bit( (bitMask & v)?1:0, power);
   }
 }
 
 void OneWire::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 */) {
   for (uint16_t i = 0 ; i < count ; i++)
-    write(buf[i]);
-  if (!power) {
-    if (!dual_mode) {
-      t_noInterrupts();
-      DIRECT_MODE_INPUT(baseReg, bitmask);
-      DIRECT_WRITE_LOW(baseReg, bitmask);
-      t_interrupts();
-    } else {
-//      t_noInterrupts();
-//      DIRECT_WRITE_LOW(baseReg_out, bitmask_out);
-//      t_interrupts();
-    }      
-  }
+    write(buf[i], power);
 }
 
 //
@@ -570,9 +481,9 @@ void OneWire::skip()
 
 void OneWire::depower()
 {
-//    t_noInterrupts();
-//    DIRECT_MODE_INPUT(baseReg, bitmask);
-//    t_interrupts();
+    t_noInterrupts();
+    DIRECT_MODE_INPUT(baseReg, bitmask);
+    t_interrupts();
 }
 
 #if ONEWIRE_SEARCH
