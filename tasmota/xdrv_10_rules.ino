@@ -1531,6 +1531,9 @@ void ExecuteCommandBlock(const char * commands, int len)
   int insertPosition = 0;       //When insert into backlog, we should do it by 0, 1, 2 ...
   char * pos = cmdbuff;
   int lenEndBlock = 0;
+
+  AddLog_P(LOG_LEVEL_INFO, PSTR("ExecuteCommandBlock+++"));
+
   while (*pos) {
     if (isspace(*pos) || '\x1e' == *pos || ';' == *pos) {
       pos++;
@@ -1547,6 +1550,7 @@ void ExecuteCommandBlock(const char * commands, int len)
       char *pEndif = pos + 3;    //Skip "IF "
       if (IF_BLOCK_ENDIF != findIfBlock(pEndif, lenEndBlock, IF_BLOCK_ENDIF)) {
         //Cannot find matched endif, stop execution.
+        AddLog_P2(LOG_LEVEL_DEBUG_MORE, PSTR("ExecuteCommandBlock: ERROR: Cannot find matched endif, stop execution: \"%s\""), pos);
         break;
       }
       //We has the whole IF statement, copy to oneCommand
@@ -1572,11 +1576,15 @@ void ExecuteCommandBlock(const char * commands, int len)
     {
       //Insert into backlog
       backlog_mutex = true;
+      AddLog_P2(LOG_LEVEL_DEBUG_MORE, PSTR("ExecuteCommandBlock: backlog.add[%d]: \"%s\""), insertPosition, sCurrentCommand.c_str());
       backlog.add(insertPosition, sCurrentCommand);
       backlog_mutex = false;
       insertPosition++;
     }
   }
+
+  AddLog_P(LOG_LEVEL_INFO, PSTR("ExecuteCommandBlock---"));
+
   return;
 }
 
@@ -1614,6 +1622,7 @@ void ProcessIfStatement(const char* statements)
       int8_t nextBlock = findIfBlock(cmdBlockEnd, lenEndBlock, IF_BLOCK_ANY);
       if (IF_BLOCK_INVALID == nextBlock) {
         //Failed
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ProcessIfStatement: ERROR: Invalid IF block"));
         break;
       }
       ExecuteCommandBlock(cmdBlockStart, cmdBlockEnd - cmdBlockStart - lenEndBlock);
@@ -1631,6 +1640,7 @@ void ProcessIfStatement(const char* statements)
         int8_t nextBlock = findIfBlock(cmdBlockEnd, lenEndBlock, IF_BLOCK_ENDIF);
         if (IF_BLOCK_ENDIF != nextBlock) {
           //Failed
+          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ProcessIfStatement: ERROR: Invalid ENDIF block"));
           break;
         }
         ExecuteCommandBlock(pos, cmdBlockEnd - pos - lenEndBlock);
