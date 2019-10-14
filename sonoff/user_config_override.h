@@ -107,4 +107,12 @@ Examples :
 #defin USE_DISCOVERY
 #endif
 
+#ifndef USE_EXPRESSION
+#define USE_EXPRESSION
+#endif
+
+#ifndef SUPPORT_IF_STATEMENT
+#define SUPPORT_IF_STATEMENT
+#endif
+
 #endif  // _USER_CONFIG_OVERRIDE_H_
