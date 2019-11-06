@@ -115,4 +115,8 @@ Examples :
 #define SUPPORT_IF_STATEMENT
 #endif
 
+#ifndef USE_VL53L0X
+#define USE_VL53L0X
+#endif
+
 #endif  // _USER_CONFIG_OVERRIDE_H_
