@@ -21,8 +21,8 @@
 #ifdef USE_VL53L0X
 
 #include <Wire.h>
-#include "VL53L0X.h"
-VL53L0X sensor;
+#include "VL53L1X.h"
+VL53L1X sensor;
 
 uint8_t vl53l0x_ready = 0;
 uint16_t vl53l0x_distance;
@@ -53,11 +53,20 @@ void Vl53l0Detect()
 
   sensor.setTimeout(500);
 
+  // Use long distance mode and allow up to 50000 us (50 ms) for a measurement.
+  // You can change these settings to adjust the performance of the sensor, but
+  // the minimum timing budget is 20 ms for short distance mode and 33 ms for
+  // medium and long distance modes. See the VL53L1X datasheet for more
+  // information on range and timing limits.
+  sensor.setDistanceMode(VL53L1X::Long);
+  sensor.setMeasurementTimingBudget(50000);
+
+
   // Start continuous back-to-back mode (take readings as
   // fast as possible).  To use continuous timed mode
   // instead, provide a desired inter-measurement period in
   // ms (e.g. sensor.startContinuous(100)).
-  sensor.startContinuous();
+  sensor.startContinuous(50);
   vl53l0x_ready = 1;
 
   Vl53l0_index=0;
@@ -80,8 +89,8 @@ void Vl53l0Every_250MSecond() {
   if (!vl53l0x_ready) return;
 
   // every 200 ms
-  uint16_t dist = sensor.readRangeContinuousMillimeters();
-  if (dist==0 || dist>2000) {
+  uint16_t dist = sensor.read();
+  if (dist==0 || dist>5000) {
     dist=9999;
   }
 
