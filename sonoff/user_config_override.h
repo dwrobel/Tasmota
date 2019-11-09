@@ -115,4 +115,8 @@ Examples :
 #define SUPPORT_IF_STATEMENT
 #endif
 
+#ifndef SUPPORT_MQTT_EVENT
+#define SUPPORT_MQTT_EVENT
+#endif
+
 #endif  // _USER_CONFIG_OVERRIDE_H_
