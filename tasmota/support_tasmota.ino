@@ -150,6 +150,28 @@ char* GetStateText(uint32_t state)
   return SettingsText(SET_STATE_TXT1 + state);
 }
 
+static void SetRelayState(const uint32_t gpio_pin, const uint32_t pin_state, const bool is_inverted)
+{
+  // is_inverted  state pin_state mode
+  //    true       on    LOW      OUTPUT
+  //    true       off   HIGH     PULLUP
+  //    false      on    HIGH     OUTPUT
+  //    false      off   LOW      INPUT
+
+  if (is_inverted ^ !!pin_state) {
+    pinMode(gpio_pin, OUTPUT);
+    AddLog_P2(LOG_LEVEL_DEBUG, PSTR("RLY: gpio: %d, state: %d, inv: %d, mode: %s"), gpio_pin, pin_state, is_inverted, "OUTPUT");
+  } else if (is_inverted && !!pin_state) {
+    pinMode(gpio_pin, OUTPUT);
+    AddLog_P2(LOG_LEVEL_DEBUG, PSTR("RLY: gpio: %d, state: %d, inv: %d, mode: %s"), gpio_pin, pin_state, is_inverted, "PULLUP");
+  } else {
+    pinMode(gpio_pin, OUTPUT);
+    AddLog_P2(LOG_LEVEL_DEBUG, PSTR("RLY: gpio: %d, state: %d, inv: %d, mode: %s"), gpio_pin, pin_state, is_inverted, "INPUT");
+  }
+
+  DigitalWrite(gpio_pin, pin_state);
+}
+
 /********************************************************************************************/
 
 void SetLatchingRelay(power_t lpower, uint32_t state)
@@ -166,7 +188,7 @@ void SetLatchingRelay(power_t lpower, uint32_t state)
 
   for (uint32_t i = 0; i < devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
-    DigitalWrite(GPIO_REL1 +port, bitRead(rel_inverted, port) ? !state : state);
+    SetRelayState(GPIO_REL1 +port, bitRead(rel_inverted, port) ? !state : state, bitRead(rel_inverted, port));
   }
 }
 
@@ -225,7 +247,7 @@ void SetDevicePower(power_t rpower, uint32_t source)
     for (uint32_t i = 0; i < devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
-        DigitalWrite(GPIO_REL1 +i, bitRead(rel_inverted, i) ? !state : state);
+        SetRelayState(GPIO_REL1 +i, bitRead(rel_inverted, i) ? !state : state, bitRead(rel_inverted, i));
       }
       rpower >>= 1;
     }
@@ -1331,7 +1353,7 @@ void GpioInit(void)
       pinMode(pin[GPIO_REL1 +i], OUTPUT);
       devices_present++;
       if (EXS_RELAY == my_module_type) {
-        digitalWrite(pin[GPIO_REL1 +i], bitRead(rel_inverted, i) ? 1 : 0);
+        SetRelayState(pin[GPIO_REL1 +i], bitRead(rel_inverted, i) ? 1 : 0, bitRead(rel_inverted, i));
         if (i &1) { devices_present--; }
       }
     }
