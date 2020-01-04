@@ -1,5 +1,5 @@
 /*
-  user_config_override.h - user configuration overrides my_user_config.h for Sonoff-Tasmota
+  user_config_override.h - user configuration overrides my_user_config.h for Tasmota
 
   Copyright (C) 2019  Theo Arends
 
@@ -31,7 +31,6 @@
  *   (3) for platformio:
  *         define USE_CONFIG_OVERRIDE as a build flags.
  *         ie1 : export PLATFORMIO_BUILD_FLAGS='-DUSE_CONFIG_OVERRIDE'
- *         ie2 : enable in file platformio.ini "build_flags = -Wl,-Tesp8266.flash.1m0.ld -DUSE_CONFIG_OVERRIDE"
  *       for Arduino IDE:
  *         enable define USE_CONFIG_OVERRIDE in my_user_config.h
  ******************************************************************************************************
