@@ -321,6 +321,7 @@ void setup(void)
     if (!Settings.flag3.no_power_feedback) {  // SetOption63 - Don't scan relay power state at restart - #5594 and #5663
       if ((i < MAX_RELAYS) && (pin[GPIO_REL1 +i] < 99)) {
         bitWrite(power, i, digitalRead(pin[GPIO_REL1 +i]) ^ bitRead(rel_inverted, i));
+        AddLog_P2(LOG_LEVEL_DEBUG, PSTR("RLY: gpio: %d, state: %d, inv: %d, mode: %s"), pin[GPIO_REL1 +i], digitalRead(pin[GPIO_REL1 +i]), bitRead(rel_inverted, i), "ODCZYT");
       }
     }
     if ((i < MAX_PULSETIMERS) && (bitRead(power, i) || (POWER_ALL_OFF_PULSETIME_ON == Settings.poweronstate))) {

@@ -1352,6 +1352,7 @@ void GpioInit(void)
     if (pin[GPIO_REL1 +i] < 99) {
       pinMode(pin[GPIO_REL1 +i], OUTPUT);
       devices_present++;
+      AddLog_P2(LOG_LEVEL_DEBUG, PSTR("RLY: gpio: %d, inv: %d, mode: %s"), pin[GPIO_REL1 +i], bitRead(rel_inverted, i), "OUTPUT");
       if (EXS_RELAY == my_module_type) {
         SetRelayState(pin[GPIO_REL1 +i], bitRead(rel_inverted, i) ? 1 : 0, bitRead(rel_inverted, i));
         if (i &1) { devices_present--; }
