@@ -32,6 +32,7 @@ Full Topic        -> %prefix%/%topic%/
 
 D3 GPIO0  -> Switch2n (83) <-- Close Window
 D4 GPIO2  -> Relay2i  (30)
+D2 GPIO4  -> Relay5i  (33) ==> Lamp
 D1 GPIO5  -> Switch1n (81) <-- Open Window
 D6 GPIO12 -> Relay3i  (31) ==> Open Window
 D7 GPIO13 -> Relay4i  (32) ==> Close Window
@@ -53,7 +54,7 @@ Timer2 {"Arm":1,"Mode":2,"Time":"01:00","Window":0,"Days":"1111111","Repeat":1,"
 # Relay 3 OpenWindow (POWER3)
 # Relay 4 CloseWindow (POWER4)
 # on
-Rule1 on Power1#state do var1 %value% endon on Power2#state do var2 %value% endon  on Power1#state do if (Var1==1 AND Var2==1) var3=1; Power3 0; Power4 0 elseif (Var1==1 AND Var2==0) var3=2; Power3 1; Power4 0 else var3=3 endif endon on Power2#state do if (Var1==1 AND Var2==1) var3=4; Power3 0; Power4 0 elseif (Var1==0 AND Var2==1) var3=5; Power3 0; Power4 1 else var3=6 endif endon
+Rule1 on Power1#state do var1 %value% endon on Power2#state do var2 %value% endon on Power1#state do if (Var1==1 AND Var2==1) var3=1; Power3 0; Power4 0 elseif (Var1==1 AND Var2==0) var3=2; Power3 1; Power4 0; Power5 0 else var3=3 endif endon on Power2#state do if (Var1==1 AND Var2==1) var3=4; Power3 0; Power4 0 elseif (Var1==0 AND Var2==1) var3=5; Power3 0; Power4 1; Power5 1 else var3=6 endif endon
 Rule1 1
 
 Rule2  on Clock#Timer=1 do if ((Power2#state==0) AND (Power3#state==0)) Power3 1; Power4 0 endif endon on Clock#Timer=2 do if ((Power1#state==0) AND (Power4#state==0)) Power3 0; Power4 1 endif endon on Time#Minute do Publish stat/%topic%/SUN {"SunRise":"%sunrise%","SunSet":"%sunset%"} endon
