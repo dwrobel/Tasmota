@@ -16,7 +16,7 @@ Rule1 on DS18B20-1#Temperature do Var1 %value% endon on DS18B20-2#Temperature do
 Rule1 1
 Rule2 on tele-DS18B20-3#Temperature<5 do POWER2 ON endon on tele-DS18B20-3#Temperature>10 do POWER2 OFF endon
 Rule2 1
-Rule3 on System#Boot do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1  endon on Event#BoilerHeaterEvent do Mem1 = %value% endon
+Rule3 on mqtt#connected do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Mem1 = %value% endon
 Rule3 1
 
 Rule3 based on: https://github.com/arendst/Tasmota/wiki/Subscribe-&-Unsubscribe
