@@ -18,6 +18,7 @@ Rule2 on tele-DS18B20-3#Temperature<5 do POWER2 ON endon on tele-DS18B20-3#Tempe
 Rule2 1
 Rule3 on mqtt#connected do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Mem1 = %value% endon
 Rule3 1
+SetOption36 0
 
 Rule3 based on: https://github.com/arendst/Tasmota/wiki/Subscribe-&-Unsubscribe
 mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
@@ -66,3 +67,5 @@ WebButton2 Close
 WebButton3 Opening
 WebButton4 Closing
 WebButton5 Lamp
+
+SetOption36 0
