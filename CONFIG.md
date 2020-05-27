@@ -19,6 +19,7 @@ Rule2 1
 Rule3 on mqtt#connected do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Mem1 = %value% endon
 Rule3 1
 SetOption36 0
+SetOption65 1
 
 Rule3 based on: https://github.com/arendst/Tasmota/wiki/Subscribe-&-Unsubscribe
 mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
@@ -69,3 +70,5 @@ WebButton4 Closing
 WebButton5 Lamp
 
 SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
