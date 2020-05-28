@@ -44,6 +44,7 @@ D0 GPIO16 -> Relay1i  (29)
 Latitude 50.188476
 Longitude 19.1143973
 
+Configure Timers -> Enable Timers
 Timer1 {"Arm":1,"Mode":1,"Time":"00:00","Window":0,"Days":"1111111","Repeat":1,"Output":1,"Action":3}
 Timer2 {"Arm":1,"Mode":2,"Time":"01:00","Window":0,"Days":"1111111","Repeat":1,"Output":2,"Action":3}
 
