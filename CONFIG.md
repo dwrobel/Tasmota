@@ -73,3 +73,9 @@ WebButton5 Lamp
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
