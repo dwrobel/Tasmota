@@ -58,59 +58,65 @@ Timer2 {"Arm":1,"Mode":2,"Time":"01:00","Window":0,"Days":"1111111","Repeat":1,"
 # Relay 4 CloseWindow (POWER4)
 # on
 
-Rule1
+mem5 1
 
+Rule1
 on Power1#state do var1 %value% endon
 on Power2#state do var2 %value% endon
+on Power3#state do var3 %value% endon
+on Power4#state do var4 %value% endon
 
+rule1 1
+
+
+Rule2
 on Power1#state do
  if (Var1==1 AND Var2==1)
-  var3=1;
+  var9=1;
   Power3 0;
-  Power4 0
+  Power4 0;
  elseif (Var1==1 AND Var2==0)
-  var3=2;
+  var9=2;
   Power3 1;
   Power4 0;
-  Power5 0
+  Power5 0;
  else
-  var3=3
+  var9=3
  endif
 endon
 
 on Power2#state do
   if (Var1==1 AND Var2==1)
-    var3=4;
+    var9=4;
     Power3 0;
     Power4 0
   elseif (Var1==0 AND Var2==1)
-    var3=5;
+    var9=5;
     Power3 0;
     Power4 1;
-    Power5 1
+    Power5 %mem5%;
   else
-    var3=6
+    var9=6
   endif
 endon
 
-Rule1 1
+Rule2 1
 
 
-Rule2
-
+Rule3
 on Clock#Timer=1 do
- if ((Power2#state==0) AND (Power3#state==0))
+ if ((Var2==0) AND (Var3==0))
   Power3 1;
   Power4 0;
-  Power5 0
+  Power5 0;
  endif
 endon
 
 on Clock#Timer=2 do
- if ((Power1#state==0) AND (Power4#state==0))
+ if ((Var1==0) AND (Var4==0))
   Power3 0;
   Power4 1;
-  Power5 1
+  Power5 %mem5%;
  endif
 endon
 
@@ -118,7 +124,7 @@ on Time#Minute do
  Publish stat/%topic%/SUN {"SunRise":"%sunrise%","SunSet":"%sunset%"}
 endon
 
-Rule2 1
+Rule3 1
 
 
 # Button's labels
