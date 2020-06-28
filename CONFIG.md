@@ -20,6 +20,8 @@ Rule3 on mqtt#connected do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHea
 Rule3 1
 SetOption36 0
 SetOption65 1
+WebButton1 Heater
+WebButton2 Anti freezing
 
 Rule3 based on: https://github.com/arendst/Tasmota/wiki/Subscribe-&-Unsubscribe
 mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
