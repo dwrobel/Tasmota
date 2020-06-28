@@ -45,7 +45,7 @@ Hard resetting via RTS pin...
 
 3. Flash the new firmware  (from: https://github.com/arendst/Sonoff-Tasmota/releases)
 
-[sw@dell esptool]$ ./esptool.py --port /dev/ttyUSB0 write_flash -fs 1MB -fm dout 0x0 sonoff.bin
+[sw@dell esptool]$ ./esptool.py --port /dev/ttyUSB0 write_flash -fs 4MB -fm dout 0x0 tasmota-sensors.bin
 esptool.py v2.8-dev
 Serial port /dev/ttyUSB0
 Connecting....
