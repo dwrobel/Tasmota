@@ -143,3 +143,6 @@ SetOption65 1
 TimeDST 0,0,3,7,2,120
 TimeSTD 0,0,10,7,3,60
 Timezone 99
+
+Reset 99
+
