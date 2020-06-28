@@ -8,7 +8,7 @@ d) Release button after ~2secs
 
 1. Backup original firmware (esptool.py from: https://github.com/espressif/esptool.git)
 
-$ ./esptool.py --port /dev/ttyUSB0 read_flash 0x00000 0x100000 sonoff-backup.bin
+$ esptool --port /dev/ttyUSB0 read_flash 0x00000 0x100000 sonoff-backup.bin
 esptool.py v2.8-dev
 Serial port /dev/ttyUSB0
 Connecting....
@@ -27,7 +27,7 @@ Hard resetting via RTS pin...
 
 2. Erase firmware
 
-$ ./esptool.py --port /dev/ttyUSB0 erase_flash
+$ esptool --port /dev/ttyUSB0 erase_flash
 esptool.py v2.8-dev
 Serial port /dev/ttyUSB0
 Connecting....
@@ -43,9 +43,9 @@ Erasing flash (this may take a while)...
 Chip erase completed successfully in 3.2s
 Hard resetting via RTS pin...
 
-3. Flash the new firmware  (from: https://github.com/arendst/Sonoff-Tasmota/releases)
+3a. Flash the new firmware (from: https://github.com/arendst/Tasmota/releases)
 
-[sw@dell esptool]$ ./esptool.py --port /dev/ttyUSB0 write_flash -fs 1MB -fm dout 0x0 sonoff.bin
+$ esptool --port /dev/ttyUSB0 write_flash -fs 4MB -fm dout 0x0 .pio/build/tasmota-sensors/firmware.bin
 esptool.py v2.8-dev
 Serial port /dev/ttyUSB0
 Connecting....
@@ -65,4 +65,35 @@ Hash of data verified.
 Leaving...
 Hard resetting via RTS pin...
 
+3b. Flash ESP32
+
+$ esptool --chip esp32 --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dout --flash_size detect 0x0 .pio/build/tasmota32/firmware.factory.bin && pio device monitor
+esptool.py v3.2
+Found 1 serial ports
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-D0WDQ6 (revision 1)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+WARNING: Detected crystal freq 41.01MHz is quite different to normalized freq 40MHz. Unsupported crystal in use?
+Crystal is 40MHz
+MAC: 10:52:1c:5c:e5:d8
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 921600
+Changed.
+Configuring flash size...
+Auto-detected Flash size: 4MB
+Flash will be erased from 0x00000000 to 0x00172fff...
+Compressed 1516272 bytes to 1027948...
+Wrote 1516272 bytes (1027948 compressed) at 0x00000000 in 14.8 seconds (effective 818.5 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+
 4. Power off then power on again
+
+5. Using addr2line tool
+
+$ ~/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line -pfiaC -e .pio/build/tasmota32/firmware.elf 0x400e802c:0x3ffb2620
