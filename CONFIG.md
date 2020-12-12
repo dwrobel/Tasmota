@@ -1,11 +1,21 @@
+Garage:
+Configuration/Config Module:
+D1 GPIO5         -> Relay2i (30)
+D5 GPIO14 Sensor -> DS18x20 (4)
+D0 GPIO16        -> Relay1i (29)
+
 Configuration/Configure MQTT
 Host              -> piwnica
 Port              -> 1885
-Topic             -> sonoff-54
+Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
-CConfiguration/Config Module:
-D4 GPIO2         -> Relay2i (30
+
+
+Boiler:
+
+Configuration/Config Module:
+D4 GPIO2         -> Relay2i (30)
 D5 GPIO14 Sensor -> DS18x20 (4)
 D0 GPIO16        -> Relay1i (29)
 
