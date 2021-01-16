@@ -1,3 +1,38 @@
+Incubator:
+Configuration/Config Module:
+D6 GPIO12        -> AM2301
+D7 GPIO13        -> Relay_i [1]
+D5 GPIO14        -> DS18x20
+
+Configuration/Configure MQTT:
+Host              -> piwnica
+Port              -> 1883
+Topic             -> incubator
+Full Topic        -> %prefix%/%topic%/
+
+Configure Logging:
+Telemetry period  -> 10
+
+Console:
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
+
+WebButton1 "Heater stop"
+
+Rule1 1
+Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Temperature>37.7 do POWER1 ON endon
+
+
+
 Garage:
 Configuration/Config Module:
 D1 GPIO5         -> Relay2i (30)
