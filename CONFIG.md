@@ -6,7 +6,7 @@ D0 GPIO16        -> Relay1i (29)
 
 Configuration/Configure MQTT
 Host              -> piwnica
-Port              -> 1885
+Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
@@ -40,7 +40,7 @@ stat/sonoff-54/RESULT = {"Mem1":"1.000"}
 
 Configuration/Configure MQTT
 Host              -> piwnica
-Port              -> 1885
+Port              -> 1883
 Topic             -> kurnik
 Full Topic        -> %prefix%/%topic%/
 
