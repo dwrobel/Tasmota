@@ -1,6 +1,6 @@
 Incubator:
 Configuration/Config Module:
-D6 GPIO12        -> AM2301
+D6 GPIO12        -> SI7021
 D7 GPIO13        -> Relay_i [1]
 D5 GPIO14        -> DS18x20
 
