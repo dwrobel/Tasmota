@@ -35,9 +35,15 @@ Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Tempe
 
 Garage:
 Configuration/Config Module:
-D1 GPIO5         -> Relay2i (30)
+D1 GPIO5         -> Relay2i (30) - Closing gate
 D5 GPIO14 Sensor -> DS18x20 (4)
-D0 GPIO16        -> Relay1i (29)
+    - 01187613BAFF - freezer outside
+    - 03186C15A7FF - freezer inside
+    -              - hot water
+    -              - cold water
+D0 GPIO16        -> Relay1i (29) - Opening gate
+
+D2 GPIO4         -> Counter1(42) - Flow sensor
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -45,6 +51,26 @@ Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
+# Reset counters at TelePeriod time
+SetOption79 1
+
+WebButton1 Open
+WebButton2 Close
+
+TelePeriod 10
+
+Console:
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
 
 
 Boiler:
