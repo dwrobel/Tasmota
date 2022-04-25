@@ -19,6 +19,7 @@
 
 #ifdef USE_DS18x20
 #include <DallasTemperature.h>
+#include <TrivialKalmanFilter.h>
 
 /*********************************************************************************************\
  * DS18B20 - Temperature - Multiple sensors
@@ -34,6 +35,14 @@
 #   define _1WIRE_MAX_ERRORS 3
 #endif
 
+// For more information see: https://github.com/dwrobel/TrivialKalmanFilter
+#ifndef KALMAN_COVARIANCE_RK
+#define KALMAN_COVARIANCE_RK 4.7e-3f // Estimation of the noise covariances (process)
+#endif
+#ifndef KALMAN_COVARIANCE_QK
+#define KALMAN_COVARIANCE_QK 1e-5f   // Estimation of the noise covariances (observation)
+#endif
+
 #define _1W_STR "%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX"
 #define _1W_ARG(a) (uint8_t) a[0], (uint8_t)a[1], (uint8_t)a[2], (uint8_t)a[3], (uint8_t)a[4], (uint8_t)a[5], (uint8_t)a[6], (uint8_t)a[7]
 
@@ -44,12 +53,18 @@ struct temp_sensor {
     temp_sensor()
         : addr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
         , errors(0)
-        , temp(nan("")) {
+        , temp(nan(""))
+        , filter(KALMAN_COVARIANCE_RK, KALMAN_COVARIANCE_QK) {
+    }
+
+    float update(const float temp) {
+        return filter.update(temp);
     }
 
     DeviceAddress addr;
     uint8_t errors;
     float temp;
+    TrivialKalmanFilter<float> filter;
 } sensors[DS18X20_MAX_SENSORS];
 
 
@@ -234,6 +249,10 @@ static void Ds18x20EverySecond(void) {
 
         auto temp = t->temp = ConvertTemp(temp_C);
 
+        if (Settings->flag5.ds18x20_mean) {
+            temp = t->update(t->temp);
+        }
+
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu temp: %*_f"),
                i,
                _1W_ARG(t->addr),
@@ -259,7 +278,7 @@ static void Ds18x20Show(bool json) {
             continue;
         }
 
-        const auto temp = t->temp;
+        const auto temp = Settings->flag5.ds18x20_mean ? t->filter.get() : t->temp;
 
         if (json) {
             ResponseAppend_P(PSTR(",\"%s\":{\"" D_JSON_ID "\":\"" _1W_STR "\",\"" D_JSON_TEMPERATURE "\":%*_f}"),
