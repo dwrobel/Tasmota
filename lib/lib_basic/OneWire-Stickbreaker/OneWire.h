@@ -560,9 +560,8 @@ class OneWire
 
     void read_bytes(uint8_t *buf, uint16_t count);
 
-    // Write a bit. The bus is always left powered at the end, see
-    // note in write() about that.
-    void write_bit(uint8_t v);
+    // Write a bit.
+    void write_bit(uint8_t v, uint8_t power = 0);
 
     // Read a bit.
     uint8_t read_bit(void);
