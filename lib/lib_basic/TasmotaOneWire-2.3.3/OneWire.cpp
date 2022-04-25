@@ -322,16 +322,16 @@ void directModeOutput(IO_REG_TYPE pin)
 
 #endif
 
-OneWire::OneWire(uint8_t pin, int8_t pin_out) {
+void OneWire::begin(uint8_t pin) {
     pinMode(pin, INPUT);
     bitmask = PIN_TO_BITMASK(pin);
     baseReg = PIN_TO_BASEREG(pin);
-    dual_mode = (pin_out > -1);
-    if (dual_mode) {
-      pinMode(pin_out, OUTPUT);
-      bitmask_out = PIN_TO_BITMASK(pin_out);
-      baseReg_out = PIN_TO_BASEREG(pin_out);
-    }
+    dual_mode = false; //(pin_out > -1);
+//    if (dual_mode) {
+//      pinMode(pin_out, OUTPUT);
+//      bitmask_out = PIN_TO_BITMASK(pin_out);
+//      baseReg_out = PIN_TO_BASEREG(pin_out);
+//    }
 #if ONEWIRE_SEARCH
     reset_search();
 #endif
