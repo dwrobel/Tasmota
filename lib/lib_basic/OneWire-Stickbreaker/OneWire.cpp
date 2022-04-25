@@ -214,9 +214,9 @@ uint8_t OneWire::reset(void)
 // more certain timing.
 //
 #ifdef ARDUINO_ARCH_ESP32
-void IRAM_ATTR OneWire::write_bit(uint8_t v)
+void IRAM_ATTR OneWire::write_bit(uint8_t v, uint8_t power)
 #else
-void OneWire::write_bit(uint8_t v)
+void OneWire::write_bit(uint8_t v, uint8_t power)
 #endif
 {
 	IO_REG_TYPE mask IO_REG_MASK_ATTR = bitmask;
@@ -227,6 +227,7 @@ void OneWire::write_bit(uint8_t v)
 		DIRECT_WRITE_LOW(reg, mask);
 		DIRECT_MODE_OUTPUT(reg, mask);	// drive output low
 		delayMicroseconds(ONEWIRE_TIME_A);
+                if (!power) DIRECT_MODE_INPUT(reg, mask); // allow it to float
 		DIRECT_WRITE_HIGH(reg, mask);	// drive output high
         t_interrupts();
 		delayMicroseconds(ONEWIRE_TIME_B);
@@ -235,6 +236,7 @@ void OneWire::write_bit(uint8_t v)
 		DIRECT_WRITE_LOW(reg, mask);
 		DIRECT_MODE_OUTPUT(reg, mask);	// drive output low
 		delayMicroseconds(ONEWIRE_TIME_C);
+                if (!power) DIRECT_MODE_INPUT(reg, mask); // allow it to float
 		DIRECT_WRITE_HIGH(reg, mask);	// drive output high
         t_interrupts();
 		delayMicroseconds(ONEWIRE_TIME_D);
@@ -278,25 +280,13 @@ void OneWire::write(uint8_t v, uint8_t power /* = 0 */) {
   uint8_t bitMask;
 
   for (bitMask = 0x01; bitMask; bitMask <<= 1) {
-    OneWire::write_bit( (bitMask & v)?1:0);
-  }
-  if ( !power) {
-      t_noInterrupts();
-      DIRECT_MODE_INPUT(baseReg, bitmask);
-      DIRECT_WRITE_LOW(baseReg, bitmask);
-      t_interrupts();
+    OneWire::write_bit( (bitMask & v)?1:0, power);
   }
 }
 
 void OneWire::write_bytes(const uint8_t *buf, uint16_t count, bool power /* = 0 */) {
   for (uint16_t i = 0 ; i < count ; i++)
-    write(buf[i]);
-  if (!power) {
-    t_noInterrupts();
-    DIRECT_MODE_INPUT(baseReg, bitmask);
-    DIRECT_WRITE_LOW(baseReg, bitmask);
-    t_interrupts();
-  }
+    write(buf[i], power);
 }
 
 //
