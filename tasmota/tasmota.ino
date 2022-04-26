@@ -81,6 +81,7 @@
 #include "FS.h"
 #endif  // ESP32
 #endif  // USE_UFILESYS
+#include <DallasTemperature.h>
 
 // Structs
 #include "settings.h"
