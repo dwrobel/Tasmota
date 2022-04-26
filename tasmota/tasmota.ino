@@ -82,6 +82,7 @@
 #include "FS.h"
 #endif  // ESP32
 #endif  // USE_UFILESYS
+#include <DallasTemperature.h>
 
 // Structs
 #include "include/tasmota_types.h"
