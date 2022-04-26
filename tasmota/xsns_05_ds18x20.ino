@@ -46,25 +46,78 @@
 #define _1W_STR "%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX"
 #define _1W_ARG(a) (uint8_t) a[0], (uint8_t)a[1], (uint8_t)a[2], (uint8_t)a[3], (uint8_t)a[4], (uint8_t)a[5], (uint8_t)a[6], (uint8_t)a[7]
 
-static OneWire ow;
-static DallasTemperature dt;
+static struct DSBConfig {
+    DSBConfig()
+        : enabled(false)
+        , ow(OneWire())
+        , dt(DallasTemperature()) {
+    }
+
+    void set_pin(uint32_t pin) {
+        enabled = PinUsed(pin);
+
+        if (enabled) {
+            ow.begin(Pin(pin));
+            dt.setOneWire(&ow);
+        }
+    }
+
+    inline bool is_enabled() {
+        return enabled;
+    }
+
+    inline bool is_conversion_complete() {
+        return is_enabled() && dt.isConversionComplete();
+    }
+
+    inline void request_temperatures() {
+        if (is_enabled())
+            dt.requestTemperatures();
+    }
+
+    inline DallasTemperature *get_dt() {
+        return &dt;
+    }
+
+    bool enabled;
+    OneWire ow;
+    DallasTemperature dt;
+} dsb_config[] = {
+    DSBConfig(),
+    DSBConfig(),
+};
+
 
 struct temp_sensor {
     temp_sensor()
         : addr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
         , errors(0)
         , temp(nan(""))
-        , filter(KALMAN_COVARIANCE_RK, KALMAN_COVARIANCE_QK) {
+        , filter(KALMAN_COVARIANCE_RK, KALMAN_COVARIANCE_QK)
+        , dt(nullptr) {
+    }
+
+    void inline set_dt(DallasTemperature * const dt) {
+        this->dt = dt;
+    }
+
+    inline DallasTemperature * get_dt() {
+        return dt;
     }
 
     float update(const float temp) {
         return filter.update(temp);
     }
 
+    void set_addr(DeviceAddress addr) {
+        memcpy(this->addr, addr, sizeof(this->addr));
+    }
+
     DeviceAddress addr;
     uint8_t errors;
     float temp;
     TrivialKalmanFilter<float> filter;
+    DallasTemperature *dt;
 } sensors[DS18X20_MAX_SENSORS];
 
 
@@ -84,7 +137,7 @@ static bool is_free_idx(const int8_t idx) {
         return false;
     }
 
-    return !dt.validFamily(sensors[idx].addr) ? true : false;
+    return !sensors[idx].get_dt()->validFamily(sensors[idx].addr) ? true : false;
 }
 
 
@@ -158,46 +211,24 @@ static void report_errors(struct temp_sensor *const t, const uint8_t error, cons
     if (report_state || force_report_state) {
 //      DEBUG_OUTPUT(PSTR("%S%hhu e:%hhu a:" _1W_STR " F:%d->%d\n"), description, t->sensor_id, t->errors, _1W_ARG(t->addr), !t->errors, !!t->errors);
     }
+}
 
-};
+static void dallas_initialize(DallasTemperature * const d) {
+    d->begin();
 
+    const uint8_t num_dev = d->getDeviceCount();
 
-static void Ds18x20Init(void) {
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: max. devices: %d"), DS18X20_MAX_SENSORS);
-
-    ow.begin(Pin(GPIO_DSB));
-    dt.setOneWire(&ow);
-    dt.begin();
-
-    const uint8_t num_dev = dt.getDeviceCount();
-
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: devices: %hhu, max. supported devices: %d"), num_dev, DS18X20_MAX_SENSORS);
-
-    if (num_dev == 0) { // only for deubugging purpose
-        ow.reset_search();
-
-        DeviceAddress addr;
-
-        while (ow.search(addr)) {
-            const uint8_t crc = ow.crc8(addr, 7);
-
-            if (crc != addr[7]) { // can detect some type of connection problems
-                AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: a:" _1W_STR " crc: %02hhx != %02hhx"), _1W_ARG(addr), crc, addr[7]);
-            }
-        }
-
-        return;
-    }
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: devices: %hhu"), num_dev);
 
     for (uint8_t i = 0; i < num_dev; i++) {
         DeviceAddress da;
 
-        if (!dt.getAddress(da, i)) {
+        if (!d->getAddress(da, i)) {
             AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: could not retrieve device address"), i);
             continue;
         }
 
-        if (!dt.validFamily(da)) {
+        if (!d->validFamily(da)) {
             AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: id: " _1W_STR " unsupported device type"), i, _1W_ARG(da));
             continue;
         }
@@ -215,29 +246,52 @@ static void Ds18x20Init(void) {
         }
 
         temp_sensor *const t = &sensors[idx];
-        memcpy(&t->addr, da, sizeof(DeviceAddress));
+        t->set_addr(da);
+        t->set_dt(d);
 
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: type: %s, id: " _1W_STR), idx, sensor_name(idx), _1W_ARG(t->addr));
     }
 
-    dt.setWaitForConversion(false);
-    dt.requestTemperatures();
+    d->setWaitForConversion(false);
+    d->requestTemperatures();
 }
 
+
+static void Ds18x20Init(void) {
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: max. devices: %d"), DS18X20_MAX_SENSORS);
+
+    dsb_config[0].set_pin(GPIO_DSB);
+
+    if (dsb_config[0].is_enabled())
+        dallas_initialize(dsb_config[0].get_dt());
+
+    dsb_config[1].set_pin(GPIO_DSB_OUT);
+
+    if (dsb_config[1].is_enabled())
+        dallas_initialize(dsb_config[1].get_dt());
+}
+
+
 static void Ds18x20EverySecond(void) {
-    if (!dt.isConversionComplete()) {
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond: conversion is in progress..."));
-        return;
+    for (uint8_t i = 0; i < sizeof(dsb_config)/sizeof(dsb_config[0]); i++) {
+        if (!dsb_config[i].is_enabled())
+            continue;
+
+        if (!dsb_config[i].is_conversion_complete()) {
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond: conversion is in progress..."));
+            return;
+        }
     }
 
     for (uint8_t i = 0; i < DS18X20_MAX_SENSORS; i++) {
         temp_sensor *const t = &sensors[i];
+        DallasTemperature * const d = t->get_dt();
 
-        if (!dt.validFamily(t->addr)) {
+        if (!d->validFamily(t->addr)) {
             break;
         }
 
-        const int16_t temp_raw = dt.getTemp(t->addr);
+        const int16_t temp_raw = d->getTemp(t->addr);
 
         if (temp_raw == DEVICE_DISCONNECTED_RAW) {
             report_errors(t, +1);
@@ -245,7 +299,7 @@ static void Ds18x20EverySecond(void) {
             continue;
         }
 
-        const float temp_C = dt.rawToCelsius(temp_raw);
+        const float temp_C = d->rawToCelsius(temp_raw);
 
         auto temp = t->temp = ConvertTemp(temp_C);
 
@@ -263,14 +317,20 @@ static void Ds18x20EverySecond(void) {
         report_errors(t, 0);
     }
 
-    dt.requestTemperatures();
+    for (uint8_t i = 0; i < sizeof(dsb_config)/sizeof(dsb_config[0]); i++) {
+        if (!dsb_config[i].is_enabled())
+            continue;
+
+        dsb_config[i].request_temperatures();
+    }
 }
 
 static void Ds18x20Show(bool json) {
     for (uint8_t i = 0; i < DS18X20_MAX_SENSORS; i++) {
         temp_sensor *const t = &sensors[i];
+        DallasTemperature * const d = t->get_dt();
 
-        if (!dt.validFamily(t->addr)) {
+        if (!d->validFamily(t->addr)) {
             break;
         }
 
@@ -311,7 +371,7 @@ static void Ds18x20Show(bool json) {
 \*********************************************************************************************/
 
 bool Xsns05(const uint8_t function) {
-    if (!PinUsed(GPIO_DSB)) {
+    if (!(PinUsed(GPIO_DSB) || PinUsed(GPIO_DSB_OUT))) {
         return false;
     }
 
