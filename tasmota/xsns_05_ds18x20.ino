@@ -92,6 +92,7 @@ struct temp_sensor {
     temp_sensor()
         : addr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
         , errors(0)
+        , total_errors(0)
         , temp(nan(""))
         , filter(KALMAN_COVARIANCE_RK, KALMAN_COVARIANCE_QK)
         , dt(nullptr) {
@@ -115,6 +116,7 @@ struct temp_sensor {
 
     DeviceAddress addr;
     uint8_t errors;
+    uint32_t total_errors;
     float temp;
     TrivialKalmanFilter<float> filter;
     DallasTemperature *dt;
@@ -197,6 +199,7 @@ static void report_errors(struct temp_sensor *const t, const uint8_t error, cons
 
         // communication error
         t->errors++;
+        t->total_errors++;
 
         if (t->errors > _1WIRE_MAX_ERRORS) {
             t->errors = _1WIRE_MAX_ERRORS;
@@ -295,7 +298,7 @@ static void Ds18x20EverySecond(void) {
 
         if (temp_raw == DEVICE_DISCONNECTED_RAW) {
             report_errors(t, +1);
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu"), i, _1W_ARG(t->addr), t->errors);
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu/%u"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
             continue;
         }
 
@@ -307,10 +310,11 @@ static void Ds18x20EverySecond(void) {
             temp = t->update(t->temp);
         }
 
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu temp: %*_f"),
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu/%u temp: %*_f"),
                i,
                _1W_ARG(t->addr),
                t->errors,
+               t->total_errors,
                Settings->flag2.temperature_resolution,
                &temp);
 
