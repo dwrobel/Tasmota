@@ -43,7 +43,7 @@
 #define KALMAN_COVARIANCE_QK 1e-5f   // Estimation of the noise covariances (observation)
 #endif
 
-#define _1W_STR "%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX%002hhX"
+#define _1W_STR "%002X%002X%002X%002X%002X%002X%002X%002X"
 #define _1W_ARG(a) (uint8_t) a[0], (uint8_t)a[1], (uint8_t)a[2], (uint8_t)a[3], (uint8_t)a[4], (uint8_t)a[5], (uint8_t)a[6], (uint8_t)a[7]
 
 static struct DSBConfig {
@@ -173,11 +173,11 @@ static const char *sensor_name(const int8_t index) {
 
     if (index != last_index || index < 0) {
         if (is_free_idx(index)) {
-            snprintf(name, sizeof(name), "%s-%hhd", "Unknown", index + 1);
+            snprintf(name, sizeof(name), "%s-%d", "Unknown", index + 1);
         } else {
             GetTextIndexed(name, sizeof(name), get_model_name_index(sensors[index].addr[0]), model_name);
             const uint8_t name_len = strlen(name);
-            snprintf(name + name_len, sizeof(name) - name_len, "-%hhd", index + 1);
+            snprintf(name + name_len, sizeof(name) - name_len, "-%d", index + 1);
         }
 
         last_index = index;
@@ -212,7 +212,7 @@ static void report_errors(struct temp_sensor *const t, const uint8_t error, cons
     } while (0);
 
     if (report_state || force_report_state) {
-//      DEBUG_OUTPUT(PSTR("%S%hhu e:%hhu a:" _1W_STR " F:%d->%d\n"), description, t->sensor_id, t->errors, _1W_ARG(t->addr), !t->errors, !!t->errors);
+//      DEBUG_OUTPUT(PSTR("%S%u e:%u a:" _1W_STR " F:%d->%d\n"), description, t->sensor_id, t->errors, _1W_ARG(t->addr), !t->errors, !!t->errors);
     }
 }
 
@@ -221,30 +221,30 @@ static void dallas_initialize(DallasTemperature * const d) {
 
     const uint8_t num_dev = d->getDeviceCount();
 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: devices: %hhu"), num_dev);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20Init: devices: %u"), num_dev);
 
     for (uint8_t i = 0; i < num_dev; i++) {
         DeviceAddress da;
 
         if (!d->getAddress(da, i)) {
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: could not retrieve device address"), i);
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: could not retrieve device address"), i);
             continue;
         }
 
         if (!d->validFamily(da)) {
-            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: id: " _1W_STR " unsupported device type"), i, _1W_ARG(da));
+            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " unsupported device type"), i, _1W_ARG(da));
             continue;
         }
 
         if (addr2idx(da) >= 0) {
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: id: " _1W_STR " duplicate device connected to the bus"), i, _1W_ARG(da));
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " duplicate device connected to the bus"), i, _1W_ARG(da));
             continue;
         }
 
         const int8_t idx = get_first_free_idx();
 
         if (idx < 0) {
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: id: " _1W_STR " too many devices connected to the bus"), i, _1W_ARG(da));
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " too many devices connected to the bus"), i, _1W_ARG(da));
             continue;
         }
 
@@ -252,7 +252,7 @@ static void dallas_initialize(DallasTemperature * const d) {
         t->set_addr(da);
         t->set_dt(d);
 
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%hhu]: type: %s, id: " _1W_STR), idx, sensor_name(idx), _1W_ARG(t->addr));
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: type: %s, id: " _1W_STR), idx, sensor_name(idx), _1W_ARG(t->addr));
     }
 
     d->setWaitForConversion(false);
@@ -298,7 +298,7 @@ static void Ds18x20EverySecond(void) {
 
         if (temp_raw == DEVICE_DISCONNECTED_RAW) {
             report_errors(t, +1);
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu/%u"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: id:" _1W_STR " errors: %u/%u"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
             continue;
         }
 
@@ -310,7 +310,7 @@ static void Ds18x20EverySecond(void) {
             temp = t->update(t->temp);
         }
 
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%hhu]: id:" _1W_STR " errors: %hhu/%u temp: %*_f"),
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: id:" _1W_STR " errors: %u/%u temp: %*_f"),
                i,
                _1W_ARG(t->addr),
                t->errors,
