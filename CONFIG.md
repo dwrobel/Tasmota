@@ -219,3 +219,19 @@ Timezone 99
 
 Reset 99
 
+
+L3F1946-P (DTS-1496-4P:):
+TX Modbr Tx
+RX Modbr Rx
+
+Rule1 1
+Rule1 on System#Boot do
+  ModbusTCPStart 502
+  ModbusBaudrate 9600
+  ModbusSerialConfig 8N1
+endon
+
+# Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
+# Set R01 Temp: ModbusSend {"deviceAddress":1, "functionCode":16, "startAddress":1158, "type":"int16","count":1, "Values":[422]}
+# Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
+# Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
