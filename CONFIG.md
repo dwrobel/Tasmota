@@ -220,16 +220,43 @@ Timezone 99
 Reset 99
 
 
-L3F1946-P (DTS-1496-4P:):
+L3F1946-P (DTS-1496-4P:): heat-exchanger
+Configuration/Config Module:
+TX GPIO1         -> ModBrTx
+RX GPIO3         -> ModBr Rx
+D1 GPIO5         -> Flowrate [1]
+D5 GPIO14        -> DS18x20  [1]
+
+Configuration/Configure MQTT:
+Host              -> piwnica
+Port              -> 1883
+Topic             -> heat_exchanger
+Full Topic        -> %prefix%/%topic%/
+
+Console:
 TX Modbr Tx
 RX Modbr Rx
 
 Rule1 1
 Rule1 on System#Boot do
-  ModbusTCPStart 502
-  ModbusBaudrate 9600
-  ModbusSerialConfig 8N1
+  ModbusBaudrate 9600;
+  ModbusSerialConfig 8N1;
+  ModbusTCPStart 502;
 endon
+
+TelePeriod 5
+
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
 
 # Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
