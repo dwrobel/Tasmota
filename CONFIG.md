@@ -262,3 +262,65 @@ Reset 99
 # Set R01 Temp: ModbusSend {"deviceAddress":1, "functionCode":16, "startAddress":1158, "type":"int16","count":1, "Values":[422]}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
 # Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
+
+Air-X:
+
+To disable deepsleep over MQTT use mosquitto_pub with: -t "cmnd/air-x/DeepsleepTime" -r -m "0"
+    To remove retained message use mosquitto_pub with: -t "cmnd/air-x/DeepsleepTime" -r -n"
+
+ESP32-D0WD
+Host              -> piwnica
+Port              -> 1883
+Topic             -> air-x
+Full Topic        -> %prefix%/%topic%/
+
+Configuration/Config Module:
+PIC16F                       Pin
+ESP32-DevKit(1)           Pin
+IO GPIO13 -> Relay     [5] 13 12
+IO GPIO14 -> Relay     [4] 14 11
+IO GPIO16 -> DeepSleep
+IO GPIO25 -> Relay     [1] 25 13
+IO GPIO26 -> Relay     [2] 26  9
+IO GPIO27 -> Relay     [3] 27 10
+IA GPIO35 -> ADC Range [3] 35
+IA GPIO36 -> ADC Range [1] VP 17
+IA GPIO39 -> ADC Range [2] VN
+
+Configuration/Configure Other:
+Device Name: Wind Turbine Air-X RevE4.3
+
+ADC:
+12600 @13.01V
+12000 @12.50V
+10500 @11.01V
+
+Console:
+# Based on: https://tasmota.github.io/docs/ADC/
+adcparam1 6, 0, 4096, 0, 16500
+
+Rule1 1
+Rule1
+  on analog#range1>14000 do backlog power1 1; power2 1; power3 1; power4 1; power5 1; endon
+  on analog#range1<13500 do backlog power1 0; power2 0; power3 0; power4 0; power5 0; endon
+  on analog#range1<10500 do backlog DeepsleepTime 60; endon
+  on System#Boot do backlog DeepsleepTime 0; endon
+
+# Button's labels
+WebButton1 LED(13)
+WebButton2 EN0(9)
+WebButton3 EN1(10)
+WebButton4 EN2(11)
+WebButton5 EN3(12)
+
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
