@@ -283,6 +283,7 @@ IO GPIO16 -> DeepSleep
 IO GPIO25 -> Relay     [1] 25 13
 IO GPIO26 -> Relay     [2] 26  9
 IO GPIO27 -> Relay     [3] 27 10
+IO GPIO12 -> Counter   [1] 12  6
 IA GPIO35 -> ADC Range [3] 35
 IA GPIO36 -> ADC Range [1] VP 17
 IA GPIO39 -> ADC Range [2] VN
