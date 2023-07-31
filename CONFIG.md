@@ -284,17 +284,17 @@ IO GPIO25 -> Relay     [1] 25 13
 IO GPIO26 -> Relay     [2] 26  9
 IO GPIO27 -> Relay     [3] 27 10
 IO GPIO12 -> Counter   [1] 12  6
-IA GPIO35 -> ADC Range [3] 35
 IA GPIO36 -> ADC Range [1] VP 17
-IA GPIO39 -> ADC Range [2] VN
 
 Configuration/Configure Other:
 Device Name: Wind Turbine Air-X RevE4.3
 
 ADC:
+10500 @11.01V
 12600 @13.01V
 12000 @12.50V
-10500 @11.01V
+13088 @13.29V
+15380 @14.36V
 
 Console:
 # Based on: https://tasmota.github.io/docs/ADC/
@@ -302,9 +302,9 @@ adcparam1 6, 0, 4096, 0, 16500
 
 Rule1 1
 Rule1
-  on analog#range1>14000 do backlog power1 1; power2 1; power3 1; power4 1; power5 1; endon
-  on analog#range1<13500 do backlog power1 0; power2 0; power3 0; power4 0; power5 0; endon
-  on analog#range1<10500 do backlog DeepsleepTime 60; endon
+  on analog#range1>14700 do backlog power1 1; power2 1; power3 1; power4 1; power5 1; endon
+  on analog#range1<14000 do backlog power1 0; power2 0; power3 0; power4 0; power5 0; endon
+  on analog#range1<13000 do backlog DeepsleepTime 3600; endon
   on System#Boot do backlog DeepsleepTime 0; endon
 
 # Button's labels
