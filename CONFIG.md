@@ -33,17 +33,19 @@ Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Tempe
 
 
 
-Garage:
+Garage: 11.1.0.1
 Configuration/Config Module:
-D1 GPIO5         -> Relay2i (30) - Closing gate
-D5 GPIO14 Sensor -> DS18x20 (4)
+D2 GPIO4         -> Relay_i [3] - Control garage gate
+D1 GPIO5         -> Relay_i [2] - Closing main gate
+D7 GPIO13        -> DS18x20_o
+D5 GPIO14        -> DS18x20
     - 01187613BAFF - freezer outside
     - 03186C15A7FF - freezer inside
     -              - hot water
     -              - cold water
-D0 GPIO16        -> Relay1i (29) - Opening gate
+D0 GPIO16        -> Relay_i [1] - Opening main gate
 
-D2 GPIO4         -> Counter1(42) - Flow sensor
+D2 GPIO4         -> Counter [1] - Flow sensor
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -54,8 +56,9 @@ Full Topic        -> %prefix%/%topic%/
 # Reset counters at TelePeriod time
 SetOption79 1
 
-WebButton1 Open
-WebButton2 Close
+WebButton1 Open main gate
+WebButton2 Close main gate
+WebButton3 Control garage gate
 
 TelePeriod 10
 
