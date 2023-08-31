@@ -45,8 +45,6 @@ D5 GPIO14        -> DS18x20
     -              - cold water
 D0 GPIO16        -> Relay_i [1] - Opening main gate
 
-D2 GPIO4         -> Counter [1] - Flow sensor
-
 Configuration/Configure MQTT
 Host              -> piwnica
 Port              -> 1883
