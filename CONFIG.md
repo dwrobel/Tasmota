@@ -74,7 +74,7 @@ Timezone 99
 Reset 99
 
 
-Boiler:
+Boiler: esp8266-1 8.3.1.6
 
 Configuration/Config Module:
 D4 GPIO2         -> Relay2i (30)
@@ -100,6 +100,7 @@ mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
 stat/sonoff-54/RESULT = {"Mem1":"1.000"}
 
 
+Kurnik: 9.1.01
 Configuration/Configure MQTT
 Host              -> piwnica
 Port              -> 1883
