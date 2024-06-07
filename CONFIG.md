@@ -33,17 +33,20 @@ Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Tempe
 
 
 
-Garage:
+Garage: 12.2.0.2 previous: 11.1.0.1
 Configuration/Config Module:
-D1 GPIO5         -> Relay2i (30) - Closing gate
-D5 GPIO14 Sensor -> DS18x20 (4)
-    - 01187613BAFF - freezer outside
-    - 03186C15A7FF - freezer inside
-    -              - hot water
-    -              - cold water
-D0 GPIO16        -> Relay1i (29) - Opening gate
-
-D2 GPIO4         -> Counter1(42) - Flow sensor
+TX GPIO1         -> ModBr Tx
+RX GPIO3         -> Modbr Rx
+D2 GPIO4         -> Relay_i   [3] - Control garage gate
+D1 GPIO5         -> Relay_i   [2] - Closing main gate
+D7 GPIO13        -> DS18x20_o [1]
+ [4] 28FF640219C1FFC0 - basement
+D5 GPIO14        -> DS18x20   [1]
+ [0] 28FFC252761801CC - hot water
+ [1] 28FFBA13761801F0 - freezer outside
+ [2] 28FF810134180145 - cold water
+ [3] 28FFA7156C1803F5 - freezer inside
+D0 GPIO16        -> Relay1_i  [1] - Opening main gate
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -51,15 +54,24 @@ Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
+Console
+
+Rule1 1
+Rule1 on System#Boot do
+  ModbusTCPStart 502
+  ModbusBaudrate 9600
+  ModbusSerialConfig 8N1
+endon
+
 # Reset counters at TelePeriod time
 SetOption79 1
 
-WebButton1 Open
-WebButton2 Close
+WebButton1 Open main gate
+WebButton2 Close main gate
+WebButton3 Control garage gate
 
 TelePeriod 10
 
-Console:
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
@@ -220,9 +232,20 @@ Timezone 99
 Reset 99
 
 
-L3F1946-P (DTS-1496-4P:):
-TX Modbr Tx
-RX Modbr Rx
+L3F1946-P (DTS-1496-4P:) 12.2.0.2: heat-exchanger
+Configuration/Config Module:
+TX GPIO1         -> ModBrTx
+RX GPIO3         -> ModBr Rx
+D1 GPIO5         -> Flowrate [1]
+D5 GPIO14        -> DS18x20  [1]
+
+Configuration/Configure MQTT:
+Host              -> piwnica
+Port              -> 1883
+Topic             -> heat_exchanger
+Full Topic        -> %prefix%/%topic%/
+
+Console:
 
 Rule1 1
 Rule1 on System#Boot do
@@ -230,6 +253,20 @@ Rule1 on System#Boot do
   ModbusBaudrate 9600
   ModbusSerialConfig 8N1
 endon
+
+TelePeriod 5
+
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
 
 # Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
