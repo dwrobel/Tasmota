@@ -118,12 +118,11 @@ Topic             -> kurnik
 Full Topic        -> %prefix%/%topic%/
 
 D3 GPIO0  -> Switch2n (83) <-- Close Window
-D4 GPIO2  -> Relay2i  (30)
+D4 GPIO2  -> DS18x20  (30) <-- Temp. sensors
 D2 GPIO4  -> Relay5i  (33) ==> Lamp
 D1 GPIO5  -> Switch1n (81) <-- Open Window
 D6 GPIO12 -> Relay3i  (31) ==> Open Window
 D7 GPIO13 -> Relay4i  (32) ==> Close Window
-D5 GPIO14 -> DS18x20   (4) <-- Temp. sensors
 D0 GPIO16 -> Relay1i  (29)
 
 Latitude 50.188476
