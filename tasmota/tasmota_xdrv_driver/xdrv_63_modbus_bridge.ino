@@ -312,7 +312,7 @@ void ModbusBridgeHandle(void)
           nrOfBytes += 4;
         }
         client.flush();
-        AddLog(LOG_LEVEL_DEBUG, PSTR("MBS: MBRTCP from Modbus deviceAddress %d, writing %d bytes to client"), modbusBridge.buffer[0], nrOfBytes);
+        AddLog(LOG_LEVEL_DEBUG, PSTR("MBS: MBRTCP from Modbus TransactionId:%d, deviceAddress %d, writing %d bytes to client"), (static_cast<uint16_t>(header[0]) << 8) + header[1], modbusBridge.buffer[0], nrOfBytes);
       }
     }
 #endif
@@ -654,6 +654,7 @@ void ModbusTCPHandle(void)
       if (!client)
       {
         client = new_client;
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TCP "MBS: MBRTCP connection %s using slot %u"), client.remoteIP().toString().c_str(), i);
         break;
       }
     }
@@ -661,6 +662,7 @@ void ModbusTCPHandle(void)
     {
       i = modbusBridgeTCP.client_next++ % nitems(modbusBridgeTCP.client_tcp);
       WiFiClient &client = modbusBridgeTCP.client_tcp[i];
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TCP "MBS: MBRTCP connection %s using slot %u (stopping client %s)"), new_client.remoteIP().toString().c_str(), i, client.remoteIP().toString().c_str());
       client.stop();
       client = new_client;
     }
