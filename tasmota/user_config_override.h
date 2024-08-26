@@ -119,4 +119,18 @@ Examples :
 #define USE_FLOWRATEMETER
 #endif
 
+#ifdef USE_BERRY
+    #ifndef USE_BERRY_DEBUG
+    #define USE_BERRY_DEBUG    // Compile Berry bytecode with line number information, makes exceptions easier to debug. Adds +8% of memory consumption for compiled code
+    #endif
+
+    #ifndef UBE_BERRY_DEBUG_GC
+    #define UBE_BERRY_DEBUG_GC // Print low-level GC metrics
+    #endif
+
+    #ifndef USE_BERRY_INT64
+    #define USE_BERRY_INT64    // Add 64 bits integer support (+1.7KB Flash)
+    #endif
+#endif
+
 #endif  // _USER_CONFIG_OVERRIDE_H_
