@@ -8,7 +8,7 @@ export PLATFORMIO_BUILD_FLAGS='-DUSE_CONFIG_OVERRIDE -DSTA_PASS1=\"\" -DSTA_PASS
 # For ESP32-D0WDQ6 v1.0 (PSRAM disabled) (https://github.com/LilyGO/TTGO-T8-ESP32.git)
 # use "board = esp32-fix" in platformio_tasmota_env32.ini for [env:tasmota32].
 
-for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2; do
+for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2 tasmota32s3; do
     pio run -e ${t}
     cp -pf .pio/build/${t}/firmware.bin ${t}.bin
     gzip -c ${t}.bin >${t}.bin.gz
