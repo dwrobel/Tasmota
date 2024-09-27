@@ -58,10 +58,16 @@ Console
 
 Rule1 1
 Rule1 on System#Boot do
-  ModbusTCPStart 502
-  ModbusBaudrate 9600
-  ModbusSerialConfig 8N1
+  ModbusTCPStart 502;
+  ModbusBaudrate 9600;
+  ModbusSerialConfig 8N1;
 endon
+
+# Temperature sensor resolution
+TempRes 1
+
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
 
 # Reset counters at TelePeriod time
 SetOption79 1
@@ -72,6 +78,7 @@ WebButton3 Control garage gate
 
 TelePeriod 10
 
+# Boot loop defaults restoration control.
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
@@ -248,9 +255,9 @@ Console:
 
 Rule1 1
 Rule1 on System#Boot do
-  ModbusTCPStart 502
-  ModbusBaudrate 9600
-  ModbusSerialConfig 8N1
+  ModbusTCPStart 502;
+  ModbusBaudrate 9600;
+  ModbusSerialConfig 8N1;
 endon
 
 TelePeriod 5
@@ -258,6 +265,12 @@ TelePeriod 5
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
+
+# Temperature sensor resolution
+TempRes 1
+
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
 
 # Time settings
         H W M D h T
@@ -270,3 +283,17 @@ Reset 99
 # Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
 # Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
+
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
+http://www.lcdwiki.com/res/MSP1443/1.44inch_SPI_Module_MSP1443_User_Manual_EN.pdf
+https://tasmota.github.io/docs/Displays/#universal-display-driver
+https://github.com/arendst/Tasmota/discussions/17605
+
+GPIO5  SPI CS   [1]   SS
+GPIO13 SPI DC   [1]   A0
+GPIO18 SPI CLK  [1]   SCK
+GPIO23 SPI MOSI [1]   SDA
+GPIO25 DS18x20  [1]
+GPIO32 Output Hi      RESET
+GPIO33 Output Hi      LED
+GPIO39 Option A [3]
