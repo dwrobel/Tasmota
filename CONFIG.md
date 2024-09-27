@@ -33,20 +33,24 @@ Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Tempe
 
 
 
-Garage: 12.2.0.2 previous: 11.1.0.1
-Configuration/Config Module:
+Garage: ESP32-DevKit v1, branch: dw-14.2.0.3-development-ds18x20-ext-20240901
+Configuration/Config Module:                                Garage cable                      Basement cable
 TX GPIO1         -> ModBr Tx
 RX GPIO3         -> Modbr Rx
-D2 GPIO4         -> Relay_i   [3] - Control garage gate
-D1 GPIO5         -> Relay_i   [2] - Closing main gate
-D7 GPIO13        -> DS18x20_o [1]
- [4] 28FF640219C1FFC0 - basement
-D5 GPIO14        -> DS18x20   [1]
+IO GPIO25        -> DS18x20   [1]
  [0] 28FFC252761801CC - hot water
  [1] 28FFBA13761801F0 - freezer outside
  [2] 28FF810134180145 - cold water
  [3] 28FFA7156C1803F5 - freezer inside
-D0 GPIO16        -> Relay1_i  [1] - Opening main gate
+IO GPIO26        -> Relay_i   [3] - Control garage gate     White-Green
+IO GPIO27        -> Relay_i   [4] - Main circulating pump
+IO GPIO32        -> Relay_i   [1] - Opening main gate       Orange                            White-Green
+AO GPIO33        -> Relay_i   [2] - Closing main gate       Green
+                                                                                              +3V3 White-Green
+                                                                                              GND  Green
+                                                            White-Orange: Relays' common
+                                                            White-Brown & Brown: +12V
+                                                            White-Blue & Blue: GND
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -54,14 +58,12 @@ Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
-Console
+Console:
+# Temperature sensor resolution
+TempRes 1
 
-Rule1 1
-Rule1 on System#Boot do
-  ModbusTCPStart 502
-  ModbusBaudrate 9600
-  ModbusSerialConfig 8N1
-endon
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
 
 # Reset counters at TelePeriod time
 SetOption79 1
@@ -69,9 +71,11 @@ SetOption79 1
 WebButton1 Open main gate
 WebButton2 Close main gate
 WebButton3 Control garage gate
+WebButton4 Main circulating pump
 
 TelePeriod 10
 
+# Boot loop defaults restoration control.
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
@@ -248,9 +252,9 @@ Console:
 
 Rule1 1
 Rule1 on System#Boot do
-  ModbusTCPStart 502
-  ModbusBaudrate 9600
-  ModbusSerialConfig 8N1
+  ModbusTCPStart 502;
+  ModbusBaudrate 9600;
+  ModbusSerialConfig 8N1;
 endon
 
 TelePeriod 5
@@ -258,6 +262,12 @@ TelePeriod 5
 SetOption36 0
 # Based on: https://tasmota.github.io/docs/Commands/#setoption65
 SetOption65 1
+
+# Temperature sensor resolution
+TempRes 1
+
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
 
 # Time settings
         H W M D h T
@@ -270,3 +280,17 @@ Reset 99
 # Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
 # Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
+
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
+http://www.lcdwiki.com/res/MSP1443/1.44inch_SPI_Module_MSP1443_User_Manual_EN.pdf
+https://tasmota.github.io/docs/Displays/#universal-display-driver
+https://github.com/arendst/Tasmota/discussions/17605
+
+GPIO5  SPI CS   [1]   SS
+GPIO13 SPI DC   [1]   A0
+GPIO18 SPI CLK  [1]   SCK
+GPIO23 SPI MOSI [1]   SDA
+GPIO25 DS18x20  [1]
+GPIO32 Output Hi      RESET
+GPIO33 Output Hi      LED
+GPIO39 Option A [3]
