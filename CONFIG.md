@@ -33,20 +33,24 @@ Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Tempe
 
 
 
-Garage: 12.2.0.2 previous: 11.1.0.1
-Configuration/Config Module:
+Garage: ESP32-DevKit v1, branch: dw-14.2.0.3-development-ds18x20-ext-20240901
+Configuration/Config Module:                                Garage cable                      Basement cable
 TX GPIO1         -> ModBr Tx
 RX GPIO3         -> Modbr Rx
-D2 GPIO4         -> Relay_i   [3] - Control garage gate
-D1 GPIO5         -> Relay_i   [2] - Closing main gate
-D7 GPIO13        -> DS18x20_o [1]
- [4] 28FF640219C1FFC0 - basement
-D5 GPIO14        -> DS18x20   [1]
+IO GPIO25        -> DS18x20   [1]
  [0] 28FFC252761801CC - hot water
  [1] 28FFBA13761801F0 - freezer outside
  [2] 28FF810134180145 - cold water
  [3] 28FFA7156C1803F5 - freezer inside
-D0 GPIO16        -> Relay1_i  [1] - Opening main gate
+IO GPIO26        -> Relay_i   [3] - Control garage gate     White-Green
+IO GPIO27        -> Relay_i   [4] - Main circulating pump
+IO GPIO32        -> Relay_i   [1] - Opening main gate       Orange                            White-Green
+AO GPIO33        -> Relay_i   [2] - Closing main gate       Green
+                                                                                              +3V3 White-Green
+                                                                                              GND  Green
+                                                            White-Orange: Relays' common
+                                                            White-Brown & Brown: +12V
+                                                            White-Blue & Blue: GND
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -54,15 +58,7 @@ Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
-Console
-
-Rule1 1
-Rule1 on System#Boot do
-  ModbusTCPStart 502;
-  ModbusBaudrate 9600;
-  ModbusSerialConfig 8N1;
-endon
-
+Console:
 # Temperature sensor resolution
 TempRes 1
 
@@ -75,6 +71,7 @@ SetOption79 1
 WebButton1 Open main gate
 WebButton2 Close main gate
 WebButton3 Control garage gate
+WebButton4 Main circulating pump
 
 TelePeriod 10
 
