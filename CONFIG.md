@@ -38,14 +38,17 @@ Configuration/Config Module:                                Garage cable        
 TX GPIO1         -> ModBr Tx
 RX GPIO3         -> Modbr Rx
 IO GPIO25        -> DS18x20   [1]
- [0] 28FFC252761801CC - hot water
- [1] 28FFBA13761801F0 - freezer outside
- [2] 28FF810134180145 - cold water
- [3] 28FFA7156C1803F5 - freezer inside
+IO GPIO14        -> DS18x20   [2]
+ [0] 28FFBA13761801F0 - freezer outside
+ [1] 28FFA7156C1803F5 - freezer inside
+IO GPIO14        -> DS18x20   [2]
+ [2] 28FFC252761801CC - hot water
+ [3] 28FF810134180145 - cold water
 IO GPIO26        -> Relay_i   [3] - Control garage gate     White-Green
 IO GPIO27        -> Relay_i   [4] - Main circulating pump
 IO GPIO32        -> Relay_i   [1] - Opening main gate       Orange                            White-Green
 AO GPIO33        -> Relay_i   [2] - Closing main gate       Green
+IO GPIO12        -> Relay     [5] - DS18B20 Vdd
                                                                                               +3V3 White-Green
                                                                                               GND  Green
                                                             White-Orange: Relays' common
@@ -72,6 +75,7 @@ WebButton1 Open main gate
 WebButton2 Close main gate
 WebButton3 Control garage gate
 WebButton4 Main circulating pump
+WebButton5 DS18B20 Vdd
 
 TelePeriod 10
 
