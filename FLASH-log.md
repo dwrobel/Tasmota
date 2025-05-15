@@ -92,6 +92,11 @@ Hash of data verified.
 Leaving...
 Hard resetting via RTS pin...
 
+3c. Flash ESP32-webcam
+
+Short circuit GPIO0 with GND then RESET and then use the same method as described in (3b).
+See also: https://cgomesu.com/blog/Esp32cam-tasmota-webcam-server/
+
 4. Power off then power on again
 
 5. Using addr2line tool
