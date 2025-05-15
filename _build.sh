@@ -18,10 +18,12 @@ for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2 ta
     fi
 
     if [ -d ~/public_html/tasmota/ ]; then
-        cp -a ${t}.bin ${t}.bin.gz ~/public_html/tasmota/
+        REL_DIR=~/public_html/tasmota/14.2.0.3-4
+        mkdir -p ${REL_DIR}
+        cp -a ${t}.bin ${t}.bin.gz ${REL_DIR}/
 
         if [ -f ${t}.firmware.factory.bin ]; then
-            cp -a ${t}.firmware.factory.bin ~/public_html/tasmota/
+            cp -a ${t}.firmware.factory.bin ${REL_DIR}
         fi
     fi
 done
