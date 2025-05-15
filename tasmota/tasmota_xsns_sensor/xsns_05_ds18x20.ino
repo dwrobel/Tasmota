@@ -393,7 +393,7 @@ bool Xsns05(uint32_t function) {
     switch (function) {
     case FUNC_INIT:
        if (PinUsed(GPIO_DSB_OUT, GPIO_ANY)) {
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init: 'DS18x20_o' function is not supported, consider using 'DS18x20_o'"));
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init: 'DS18x20_o' function is not supported, consider using 'DS18x20'"));
        }
 
         Ds18x20Init();
