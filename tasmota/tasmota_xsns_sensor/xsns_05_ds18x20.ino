@@ -218,7 +218,7 @@ static void report_errors(struct temp_sensor *const t, const uint8_t error, cons
     }
 }
 
-static void dallas_initialize(DallasTemperature * const d) {
+static uint8_t dallas_initialize(DallasTemperature * const d) {
     d->begin();
 
     const uint8_t num_dev = d->getDeviceCount();
@@ -234,13 +234,17 @@ static void dallas_initialize(DallasTemperature * const d) {
         }
 
         if (!d->validFamily(da)) {
-            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " unsupported device type"), i, _1W_ARG(da));
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " unsupported device type"), i, _1W_ARG(da));
             continue;
         }
 
-        if (addr2idx(da) >= 0) {
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " duplicate device connected to the bus"), i, _1W_ARG(da));
-            continue;
+        {
+            const int8_t eidx = addr2idx(da);
+
+            if (eidx != -1) {
+                AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " already exist at index: %u"), i, _1W_ARG(da), eidx);
+                continue;
+            }
         }
 
         const int8_t idx = get_first_free_idx();
@@ -259,6 +263,8 @@ static void dallas_initialize(DallasTemperature * const d) {
 
     d->setWaitForConversion(false);
     d->requestTemperatures();
+
+    return num_dev;
 }
 
 
