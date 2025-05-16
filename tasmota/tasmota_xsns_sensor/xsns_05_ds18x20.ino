@@ -269,16 +269,13 @@ static uint8_t dallas_initialize(DallasTemperature * const d) {
             continue;
         }
 
-        {
-            const int8_t eidx = addr2idx(da);
+        int8_t idx = addr2idx(da);
 
-            if (eidx != -1) {
-                AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " already exist at index: %u"), i, _1W_ARG(da), eidx);
-                continue;
-            }
+        if (idx != -1) {
+            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " already exist at index: %u"), i, _1W_ARG(da), idx);
+        } else {
+            idx = get_first_free_idx();
         }
-
-        const int8_t idx = get_first_free_idx();
 
         if (idx < 0) {
             AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20Init[%u]: id: " _1W_STR " too many devices connected to the bus"), i, _1W_ARG(da));
