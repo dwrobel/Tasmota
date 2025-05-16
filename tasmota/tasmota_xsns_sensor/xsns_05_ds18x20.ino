@@ -52,13 +52,15 @@ static struct DSBConfig {
     DSBConfig()
         : enabled(false)
         , ow(OneWire())
-        , dt(DallasTemperature()) {
+        , dt(DallasTemperature())
+        , num_devices(0)
+        , conversion_completed(false) {
     }
 
     void set_pin(const uint32_t pin) {
         ow.begin(pin);
         dt.setOneWire(&ow);
-        dallas_initialize(&dt);
+        num_devices = dallas_initialize(&dt);
         enabled = true;
     }
 
@@ -67,12 +69,30 @@ static struct DSBConfig {
     }
 
     inline bool is_conversion_complete() {
-        return is_enabled() && dt.isConversionComplete();
+        if (!enabled)
+            return false;
+
+        if (!conversion_completed)
+            conversion_completed = dt.isConversionComplete();
+
+        return conversion_completed;
     }
 
     inline void request_temperatures() {
-        if (is_enabled())
+        if (!is_enabled())
+            return;
+
+        static auto reinit_counter = 0;
+        if (reinit_counter++ == 10) {
+            reinit_counter = 0;
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20[%p]: re-intialization..."), this);
+            num_devices = dallas_initialize(&dt);
+        } else {
             dt.requestTemperatures();
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20[%p]: start conversion..."), this);
+        }
+
+        conversion_completed = false;
     }
 
     inline DallasTemperature *get_dt() {
@@ -82,6 +102,8 @@ static struct DSBConfig {
     bool enabled;
     OneWire ow;
     DallasTemperature dt;
+    uint8_t num_devices;
+    bool conversion_completed;
 } dsb_config[MAX_DSB] = {
     DSBConfig(),
     DSBConfig(),
@@ -89,6 +111,15 @@ static struct DSBConfig {
     DSBConfig(),
 };
 
+static DSBConfig *find_dsb_config(const DallasTemperature * const d) {
+    for (uint8_t i = 0; i < sizeof(dsb_config)/sizeof(dsb_config[0]); i++) {
+        if (dsb_config[i].get_dt() == d) {
+            return &dsb_config[i];
+        }
+    }
+
+    return nullptr;
+}
 
 struct temp_sensor {
     temp_sensor()
@@ -283,22 +314,23 @@ static void Ds18x20Init(void) {
 
 
 static void Ds18x20EverySecond(void) {
-    for (uint8_t i = 0; i < sizeof(dsb_config)/sizeof(dsb_config[0]); i++) {
-        if (!dsb_config[i].is_enabled())
-            continue;
-
-        if (!dsb_config[i].is_conversion_complete()) {
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond: conversion is in progress..."));
-            return;
-        }
-    }
-
-    for (uint8_t i = 0; i < DS18X20_MAX_SENSORS; i++) {
+    for (uint8_t i = 0; i < sizeof(sensors)/sizeof(sensors[0]); i++) {
         temp_sensor *const t = &sensors[i];
         DallasTemperature * const d = t->get_dt();
+        DSBConfig * const cfg = find_dsb_config(d);
+
+        if (!cfg) {
+            continue;
+        }
 
         if (!d->validFamily(t->addr)) {
-            break;
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: invalid family"), i);
+            continue;
+        }
+
+        if (!cfg->is_conversion_complete()) {
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: conversion is in progress..."), i);
+            continue;
         }
 
         const int16_t temp_raw = d->getTemp(t->addr);
@@ -329,9 +361,6 @@ static void Ds18x20EverySecond(void) {
     }
 
     for (uint8_t i = 0; i < sizeof(dsb_config)/sizeof(dsb_config[0]); i++) {
-        if (!dsb_config[i].is_enabled())
-            continue;
-
         dsb_config[i].request_temperatures();
     }
 }
