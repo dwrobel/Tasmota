@@ -119,6 +119,19 @@ Examples :
 #define USE_FLOWRATEMETER
 #endif
 
+#ifndef USE_DS18x20
+#define USE_DS18x20
+#endif
+
+#ifndef USE_WS2812
+#define USE_WS2812
+#endif
+
+#ifndef USE_WS2812_HARDWARE
+#define USE_WS2812_HARDWARE NEO_HW_WS2812
+#endif
+
+
 #ifdef USE_BERRY
     #ifndef USE_BERRY_DEBUG
     #define USE_BERRY_DEBUG    // Compile Berry bytecode with line number information, makes exceptions easier to debug. Adds +8% of memory consumption for compiled code
