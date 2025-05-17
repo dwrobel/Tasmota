@@ -145,12 +145,15 @@ Examples :
     #define USE_BERRY_INT64    // Add 64 bits integer support (+1.7KB Flash)
     #endif
 
-    // https://tasmota.github.io/docs/LVGL/#compiling-for-lvlg
-    #define FIRMWARE_DISPLAYS
-    #define USE_SPI
-    #define USE_DISPLAY
-    #define USE_UNIVERSAL_DISPLAY
-    #define USE_LVGL
+    #ifdef FIRMWARE_WEBCAM
+      #define USE_BERRY_TF_LITE // https://tasmota.github.io/docs/TFL/
+    #else // https://tasmota.github.io/docs/LVGL/#compiling-for-lvlg
+      #define FIRMWARE_DISPLAYS
+      #define USE_SPI
+      #define USE_DISPLAY
+      #define USE_UNIVERSAL_DISPLAY
+      #define USE_LVGL
+    #endif
 #endif
 
 #endif  // _USER_CONFIG_OVERRIDE_H_
