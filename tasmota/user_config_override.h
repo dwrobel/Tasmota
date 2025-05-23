@@ -119,6 +119,15 @@ Examples :
 #define USE_FLOWRATEMETER
 #endif
 
+#ifndef USE_DEEPSLEEP
+#define USE_DEEPSLEEP
+#endif
+
+#ifdef DEEPSLEEP_NETWORK_TIMEOUT
+#undef DEEPSLEEP_NETWORK_TIMEOUT
+#endif
+#define DEEPSLEEP_NETWORK_TIMEOUT 0
+
 #ifndef USE_DS18x20
 #define USE_DS18x20
 #endif
