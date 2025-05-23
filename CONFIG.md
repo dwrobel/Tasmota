@@ -93,7 +93,7 @@ Timezone 99
 Reset 99
 
 
-Boiler:
+Boiler: esp8266-1 8.3.1.6
 
 Configuration/Config Module:
 D4 GPIO2         -> Relay2i (30)
@@ -119,19 +119,20 @@ mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
 stat/sonoff-54/RESULT = {"Mem1":"1.000"}
 
 
+Kurnik: 12.2.0.2
 Configuration/Configure MQTT
 Host              -> piwnica
 Port              -> 1883
 Topic             -> kurnik
 Full Topic        -> %prefix%/%topic%/
 
-D3 GPIO0  -> Switch2n (83) <-- Close Window
-D4 GPIO2  -> DS18x20  (30) <-- Temp. sensors
-D2 GPIO4  -> Relay5i  (33) ==> Lamp
-D1 GPIO5  -> Switch1n (81) <-- Open Window
-D6 GPIO12 -> Relay3i  (31) ==> Open Window
-D7 GPIO13 -> Relay4i  (32) ==> Close Window
-D0 GPIO16 -> Relay1i  (29)
+D3 GPIO0  -> Switch_n [2] <-- Close Window
+D4 GPIO2  -> DS18x20  [1] <-- Temp. sensors
+D2 GPIO4  -> Relay_i  [5] ==> Lamp
+D1 GPIO5  -> Switch_n [1] <-- Open Window
+D6 GPIO12 -> Relay_i  [3] ==> Open Window
+D7 GPIO13 -> Relay_i  [4] ==> Close Window
+D0 GPIO16 -> Relay_i  [1]
 
 Latitude 50.188476
 Longitude 19.1143973
@@ -238,8 +239,10 @@ Timezone 99
 
 Reset 99
 
+heat-exchanger: dw-14.2.0.3-development-ds18x20-ext-20240901
+Address 1: Heat Pump
+Address 2: L3F1946-P (DTS-1496-4P)
 
-L3F1946-P (DTS-1496-4P:) 12.2.0.2: heat-exchanger
 Configuration/Config Module:
 TX GPIO1         -> ModBrTx
 RX GPIO3         -> ModBr Rx
@@ -282,8 +285,74 @@ Timezone 99
 Reset 99
 
 # Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
+# Set R01 Temp: ModbusSend {"deviceAddress":1, "functionCode":16, "startAddress":1158, "type":"int16","count":1, "Values":[422]}
 # Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
 # Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
+
+Air-X:
+
+To disable deepsleep over MQTT use mosquitto_pub with: -t "cmnd/air-x/DeepsleepTime" -r -m "0"
+    To remove retained message use mosquitto_pub with: -t "cmnd/air-x/DeepsleepTime" -r -n"
+
+ESP32-D0WD
+Host              -> piwnica
+Port              -> 1883
+Topic             -> air-x
+Full Topic        -> %prefix%/%topic%/
+
+Configuration/Config Module:
+PIC16F                       Pin
+ESP32-DevKit(1)           Pin
+IO GPIO13 -> Relay     [5] 13 12
+IO GPIO14 -> Relay     [4] 14 11
+IO GPIO16 -> DeepSleep
+IO GPIO25 -> Relay     [1] 25 13
+IO GPIO26 -> Relay     [2] 26  9
+IO GPIO27 -> Relay     [3] 27 10
+IO GPIO12 -> Counter   [1] 12  6
+IA GPIO36 -> ADC Range [1] VP 17
+
+Configuration/Configure Other:
+Device Name: Wind Turbine Air-X RevE4.3
+
+ADC:
+10500 @11.01V
+12600 @13.01V
+12000 @12.50V
+13088 @13.29V
+15380 @14.36V
+
+Console:
+# Based on: https://tasmota.github.io/docs/ADC/
+adcparam1 6, 0, 4096, 0, 16500
+
+Rule1 1
+Rule1
+  on analog#range1>14700 do backlog power1 1; power2 1; power3 1; power4 1; power5 1; endon
+  on analog#range1<14000 do backlog power1 0; power2 0; power3 0; power4 0; power5 0; endon
+  on analog#range1<13000 do backlog DeepsleepTime 3600; endon
+  on System#Boot do backlog DeepsleepTime 0; endon
+
+# Button's labels
+WebButton1 LED(13)
+WebButton2 EN0(9)
+WebButton3 EN1(10)
+WebButton4 EN2(11)
+WebButton5 EN3(12)
+
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
+
+
 
 https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
 http://www.lcdwiki.com/res/MSP1443/1.44inch_SPI_Module_MSP1443_User_Manual_EN.pdf
