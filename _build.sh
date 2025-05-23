@@ -18,7 +18,7 @@ for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2 ta
     fi
 
     if [ -d ~/public_html/tasmota/ ]; then
-        REL_DIR=~/public_html/tasmota/14.6.0.2-2
+        REL_DIR=~/public_html/tasmota/14.6.0.2-3
         mkdir -p ${REL_DIR}
         cp -a ${t}.bin ${t}.bin.gz ${REL_DIR}/
 
