@@ -29,6 +29,10 @@
 
 #define XSNS_05              5
 
+#ifndef DEVICE_POWER_ON_RESET_RAW
+#   define DEVICE_POWER_ON_RESET_RAW 10880
+#endif
+
 #ifndef DS18X20_MAX_SENSORS // DS18X20_MAX_SENSORS fallback to 8 if not defined in user_config_override.h
 #   define DS18X20_MAX_SENSORS 8
 #endif
@@ -334,7 +338,16 @@ static void Ds18x20EverySecond(void) {
 
         if (temp_raw == DEVICE_DISCONNECTED_RAW) {
             report_errors(t, +1);
-            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: id:" _1W_STR " errors: %u/%u"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: id:" _1W_STR " errors: %u/%u status: disconnected"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
+            continue;
+        }
+
+        if (temp_raw == DEVICE_POWER_ON_RESET_RAW) {
+            report_errors(t, +1);
+            // TODO: For now assume that we skip all temperatures equals the power-on reset value (+85°C).
+            // Once we will need to support accepting temperatures >= +85°C, then we can implement filtering
+            // the first value of two consecutive ones.
+            AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DSB "Ds18x20EverySecond[%u]: id:" _1W_STR " errors: %u/%u status: power-on reset"), i, _1W_ARG(t->addr), t->errors, t->total_errors);
             continue;
         }
 
