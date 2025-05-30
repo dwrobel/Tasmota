@@ -25,5 +25,7 @@ for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2 ta
         if [ -f ${t}.firmware.factory.bin ]; then
             cp -a ${t}.firmware.factory.bin ${REL_DIR}
         fi
+
+        gzip -c .pio/build/${t}/firmware.elf >${REL_DIR}/${t}.elf.gz
     fi
 done
