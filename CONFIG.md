@@ -31,7 +31,60 @@ WebButton1 "Heater stop"
 Rule1 1
 Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Temperature>37.7 do POWER1 ON endon
 
+Greenhouse: (branch: dw-14.6.0.2-development-ds18x20-ext-20250517 rel: 1)
+Configuration/Config Module:
+TX GPIO1         -> Relay_i [3] Rezerwa 1
+RX GPIO3         -> Relay_i [4] Rezerwa 2
+IO GPIO15        -> AM2301
+IO GPIO18        -> DS18x20 [1]
+ [1] 28FF640219C8AEF7 - greenhouse (middle)
+ [2] 28FF64021981162E - soil (middle)
+IO GPIO19        -> Relay   [5] DS18x20 Vdd
+IO GPIO21        -> Relay_i [2] Uprawa
+IO GPIO22        -> Relay_i [1] Szklarnia
 
+Configuration/Configure MQTT:
+Host              -> piwnica
+Port              -> 1883
+Topic             -> greenhouse
+Full Topic        -> %prefix%/%topic%/
+
+autoexec.bat:
+PowerOnState 0
+SetOption36 0
+SetOption65 1
+TempRes 1
+SetOption126 1
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+WebButton1 Szklarnia
+WebButton2 Uprawa
+WebButton3 Rezerwa 1
+WebButton4 Rezerwa 2
+WebButton5 DS18x20 Vdd
+
+autoexec.be:
+# Resets DS18X20 sensor every 5 minutes
+
+var ds18b20_vdd = 4
+
+def r_on()
+end
+
+def r_off()
+  print("r_off")
+  tasmota.set_power(ds18b20_vdd, false)
+  tasmota.set_timer(2000, r_on)
+end
+
+def r_on()
+  print("r_on")
+  tasmota.set_power(ds18b20_vdd, true)
+  tasmota.set_timer(60 * 1000 * 5, r_off)
+end
+
+r_off()
 
 Garage: ESP32-DevKit v1, branch: dw-14.2.0.3-development-ds18x20-ext-20240901
 Configuration/Config Module:                                Garage cable                      Basement cable
