@@ -37,8 +37,8 @@ TX GPIO1         -> Relay_i [3] Rezerwa 1
 RX GPIO3         -> Relay_i [4] Rezerwa 2
 IO GPIO15        -> AM2301
 IO GPIO18        -> DS18x20 [1]
- [1] 28FF640219C8AEF7 - greenhouse (middle)
- [2] 28FF64021981162E - soil (middle)
+ [1] 28FF640219C8AEF7 - soil (middle)
+ [2] 28FF64021981162E - greenhouse (middle)
 IO GPIO19        -> Relay   [5] DS18x20 Vdd
 IO GPIO21        -> Relay_i [2] Uprawa
 IO GPIO22        -> Relay_i [1] Szklarnia
