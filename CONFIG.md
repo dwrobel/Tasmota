@@ -31,7 +31,7 @@ WebButton1 "Heater stop"
 Rule1 1
 Rule1 on tele-DS18B20#Temperature<37.8 do POWER1 OFF endon on tele-DS18B20#Temperature>37.7 do POWER1 ON endon
 
-Greenhouse: (branch: dw-14.6.0.2-development-ds18x20-ext-20250517 rel: 1)
+Greenhouse: 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
 Configuration/Config Module:
 TX GPIO1         -> Relay_i [3] Rezerwa 1
 RX GPIO3         -> Relay_i [4] Rezerwa 2
@@ -292,7 +292,7 @@ Timezone 99
 
 Reset 99
 
-heat-exchanger: dw-14.2.0.3-development-ds18x20-ext-20240901
+heat-exchanger: 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
 Address 1: Heat Pump
 Address 2: L3F1946-P (DTS-1496-4P)
 
