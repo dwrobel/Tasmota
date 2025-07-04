@@ -46,15 +46,17 @@ extern "C" {
   // start the ULP program - always from offset 0 (optional: pass entry)
   // The first 32 bits must be a JMP instruction to the start of the program
   //
-  // `ULP.run() -> nil`
-  void be_ULP_run(int32_t entry) {
+  // `ULP.run() -> int`
+  int32_t be_ULP_run(int32_t entry) {
+    esp_err_t err;
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    ulp_run(entry);       // entry point should be at the beginning of program
+    err = ulp_run(entry);       // entry point should be at the beginning of program
 #elif defined(CONFIG_ULP_COPROC_TYPE_RISCV) // S2 or S3
-    ulp_riscv_run();
+    err = ulp_riscv_run();
 #else // lp_core
-    int err = ulp_lp_core_run(&be_ulp_lp_core_cfg);
+    err = ulp_lp_core_run(&be_ulp_lp_core_cfg);
 #endif
+    return err;
   }
 
   // `ULP.wake_period(period_index:int, period_us:int) -> nil`
@@ -136,15 +138,16 @@ extern "C" {
    * @return void for ESP32 or binary type as int32_t on RISCV capable SOC's
    */
   void be_ULP_load(struct bvm *vm, const uint8_t *buf, size_t size) {
+    esp_err_t err;
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    esp_err_t err = ulp_load_binary(0, buf, size / 4); // FSM type only, specific header, size in long words
+    err = ulp_load_binary(0, buf, size / 4); // FSM type only, specific header, size in long words
 #elif defined(CONFIG_ULP_COPROC_TYPE_RISCV) // S2 or S3
-    esp_err_t err = ulp_riscv_load_binary(buf, size); // there are no header bytes, just load and hope for a valid binary - size in bytes
+    err = ulp_riscv_load_binary(buf, size); // there are no header bytes, just load and hope for a valid binary - size in bytes
 #else
-    esp_err_t err = ulp_lp_core_load_binary(buf,size); // check valid size, size in bytes
+    err = ulp_lp_core_load_binary(buf,size); // check valid size, size in bytes
 #endif // defined(CONFIG_IDF_TARGET_ESP32)
     if (err != ESP_OK) {
-      be_raisef(vm, "ulp_load_error", "ULP: invalid code err=%i", err);
+      be_raisef(vm, "ulp_load_error", "ULP: invalid code err=%i msg=%s", err, esp_err_to_name(err));
     }
   }
 

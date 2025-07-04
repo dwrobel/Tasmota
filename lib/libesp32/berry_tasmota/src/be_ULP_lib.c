@@ -8,8 +8,8 @@
 
 #if defined(USE_BERRY_ULP) && defined(CONFIG_ULP_COPROC_ENABLED)
 
-extern void be_ULP_run(int32_t entry);
-BE_FUNC_CTYPE_DECLARE(be_ULP_run, "", "[i]");
+extern int32_t be_ULP_run(int32_t entry);
+BE_FUNC_CTYPE_DECLARE(be_ULP_run, "i", "[i]");
 
 extern void be_ULP_wake_up_period(int32_t period_index, int32_t period_us);
 BE_FUNC_CTYPE_DECLARE(be_ULP_wake_up_period, "", "ii");
