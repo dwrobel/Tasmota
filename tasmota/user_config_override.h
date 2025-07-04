@@ -154,6 +154,10 @@ Examples :
     #define USE_BERRY_INT64    // Add 64 bits integer support (+1.7KB Flash)
     #endif
 
+    #ifndef USE_BERRY_ULP
+    #define USE_BERRY_ULP      // Enable ULP (Ultra Low Power) support (+4.9k)
+    #endif
+
     #ifdef FIRMWARE_WEBCAM
       #define USE_BERRY_TF_LITE // https://tasmota.github.io/docs/TFL/
     #else // https://tasmota.github.io/docs/LVGL/#compiling-for-lvlg
