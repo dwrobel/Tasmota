@@ -59,6 +59,15 @@ extern "C" {
     return err;
   }
 
+  void be_ULP_reset(struct bvm *vm) {
+#if defined(CONFIG_ULP_COPROC_TYPE_RISCV)
+    ulp_riscv_reset();
+#else
+    be_raisef(vm, "ulp_reset",
+              "ULP: not supported on this platform");
+#endif
+  }
+
   // `ULP.wake_period(period_index:int, period_us:int) -> nil`
   void be_ULP_wake_up_period(int32_t period_index, int32_t period_us) {
 #ifdef CONFIG_ULP_COPROC_TYPE_LP_CORE
