@@ -18,12 +18,16 @@ for t in tasmota-minimal tasmota-sensors tasmota32 tasmota32solo1 tasmota32s2 ta
     fi
 
     if [ -d ~/public_html/tasmota/ ]; then
-        REL_DIR=~/public_html/tasmota/15.0.1-1
+        REL_DIR=~/public_html/tasmota/15.0.1.1-1
         mkdir -p ${REL_DIR}
         cp -a ${t}.bin ${t}.bin.gz ${REL_DIR}/
 
         if [ -f ${t}.firmware.factory.bin ]; then
             cp -a ${t}.firmware.factory.bin ${REL_DIR}
+        fi
+
+        if [ -f variants/tasmota/${t}-safeboot.bin ]; then
+            cp -a variants/tasmota/${t}-safeboot.bin ${REL_DIR}
         fi
 
         gzip -c .pio/build/${t}/firmware.elf >${REL_DIR}/${t}.elf.gz
