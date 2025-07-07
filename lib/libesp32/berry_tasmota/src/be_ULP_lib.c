@@ -11,6 +11,9 @@
 extern int32_t be_ULP_run(int32_t entry);
 BE_FUNC_CTYPE_DECLARE(be_ULP_run, "i", "[i]");
 
+extern void be_ULP_reset(struct bvm *vm);
+BE_FUNC_CTYPE_DECLARE(be_ULP_reset, "", "@");
+
 extern void be_ULP_wake_up_period(int32_t period_index, int32_t period_us);
 BE_FUNC_CTYPE_DECLARE(be_ULP_wake_up_period, "", "ii");
 
@@ -35,6 +38,7 @@ BE_FUNC_CTYPE_DECLARE(be_ULP_load, "", "@(bytes)~");   // pass: 1/ vm, 2/ bytes 
 /* @const_object_info_begin
 module ULP (scope: global) {
   run,          ctype_func(be_ULP_run)
+  reset,        ctype_func(be_ULP_reset)
   load,         ctype_func(be_ULP_load)
   set_mem,      ctype_func(be_ULP_set_mem)
   get_mem,      ctype_func(be_ULP_get_mem)
