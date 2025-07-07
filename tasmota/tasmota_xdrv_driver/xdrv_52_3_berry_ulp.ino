@@ -70,13 +70,27 @@ extern "C" {
   }
 
   // `ULP.set_mem(position:int, value:int) -> value:int`
-  int32_t be_ULP_set_mem(int32_t pos, int32_t value) {
+  int32_t be_ULP_set_mem(struct bvm *vm, int32_t pos, int32_t value) {
+    if (unlikely(pos >= (CONFIG_ULP_COPROC_RESERVE_MEM >> 2))) {
+      be_raisef(vm, "ulp_set_mem_error",
+                "ULP: index %ld out of bounds for length %ld",
+                pos, CONFIG_ULP_COPROC_RESERVE_MEM >> 2);
+      return 0;
+    }
+
     RTC_SLOW_MEM[pos]=value;
     return value;
   }
 
   // `ULP.get_mem(position:int) -> int`
-  int32_t be_ULP_get_mem(int32_t pos) {
+  int32_t be_ULP_get_mem(struct bvm *vm, int32_t pos) {
+    if (unlikely(pos >= (CONFIG_ULP_COPROC_RESERVE_MEM >> 2))) {
+      be_raisef(vm, "ulp_get_mem_error",
+                "ULP: index %ld out of bounds for length %ld",
+                pos, CONFIG_ULP_COPROC_RESERVE_MEM >> 2);
+      return 0;
+    }
+
 #if defined(CONFIG_IDF_TARGET_ESP32)
     return RTC_SLOW_MEM[pos] & 0xFFFF;  // only low 16 bits are used
 #else

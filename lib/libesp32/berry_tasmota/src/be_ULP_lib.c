@@ -14,11 +14,11 @@ BE_FUNC_CTYPE_DECLARE(be_ULP_run, "i", "[i]");
 extern void be_ULP_wake_up_period(int32_t period_index, int32_t period_us);
 BE_FUNC_CTYPE_DECLARE(be_ULP_wake_up_period, "", "ii");
 
-extern int32_t be_ULP_set_mem(int32_t pos, int32_t value);
-BE_FUNC_CTYPE_DECLARE(be_ULP_set_mem, "i", "ii");
+extern int32_t be_ULP_set_mem(struct bvm *vm, int32_t pos, int32_t value);
+BE_FUNC_CTYPE_DECLARE(be_ULP_set_mem, "i", "@ii");
 
-extern int32_t be_ULP_get_mem(int32_t pos);
-BE_FUNC_CTYPE_DECLARE(be_ULP_get_mem, "i", "i");
+extern int32_t be_ULP_get_mem(struct bvm *vm, int32_t pos);
+BE_FUNC_CTYPE_DECLARE(be_ULP_get_mem, "i", "@i");
 
 extern int32_t be_ULP_gpio_init(int32_t pin, int32_t mode);
 BE_FUNC_CTYPE_DECLARE(be_ULP_gpio_init, "i", "ii");
