@@ -146,26 +146,44 @@ Timezone 99
 Reset 99
 
 
-Boiler: esp8266-1 8.3.1.6
+Boiler: esp8266-1 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
 
 Configuration/Config Module:
-D4 GPIO2         -> Relay2i (30)
-D5 GPIO14 Sensor -> DS18x20 (4)
-D0 GPIO16        -> Relay1i (29)
+GPIO42 -> Relay_i 2 # D4 GPIO2         -> Relay2i (30)
+GPIO40 -> DS18x20 1 # D5 GPIO14 Sensor -> DS18x20 (4)
+GPIO41 -> Relay_i 1 # D0 GPIO16        -> Relay1i (29)
 
 Console:
 Var1 = Boiler
 Var2 = Outflow
-Rule1 on DS18B20-1#Temperature do Var1 %value% endon on DS18B20-2#Temperature do Var2 %value% endon on Time#Minute do if (((Var2 < 30) AND (Var1 < 30) AND (Mem1 >= 0)) OR (Mem1 > 0)) POWER1 ON elseif ((Var2 > 35) OR (Var1 > 35) OR (Mem1 < 0)) POWER1 OFF endif endon
+Rule1 on DS18B20-1#Temperature do Backlog Var1 %value% endon on DS18B20-2#Temperature do Var2 %value% endon on Time#Minute do Backlog if (((Var2 < 30) AND (Var1 < 30) AND (Mem1 >= 0)) OR (Mem1 > 0)) POWER1 ON elseif ((Var2 > 35) OR (Var1 > 35) OR (Mem1 < 0)) POWER1 OFF endif endon
 Rule1 1
-Rule2 on tele-DS18B20-3#Temperature<5 do POWER2 ON endon on tele-DS18B20-3#Temperature>10 do POWER2 OFF endon
+Rule2 on tele-DS18B20-3#Temperature<5 do Backlog POWER2 ON endon on tele-DS18B20-3#Temperature>10 do Backlog POWER2 OFF endon
 Rule2 1
-Rule3 on mqtt#connected do Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Mem1 = %value% endon
+Rule3 on mqtt#connected do Backlog Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Backlog Mem1 = %value% endon
 Rule3 1
-SetOption36 0
-SetOption65 1
 WebButton1 Heater
 WebButton2 Anti freezing
+
+TelePeriod 10
+# Temperature sensor resolution
+TempRes 1
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
+# Boot loop defaults restoration control.
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+# Enable display of ESP32 internal temperature
+SetOption146 1
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
+
 
 Rule3 based on: https://github.com/arendst/Tasmota/wiki/Subscribe-&-Unsubscribe
 mosquitto_pub -h piwnica -t evnt/sonoff-54/BoilerHeaterMode -m {"Mem1":"1"}
