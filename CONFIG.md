@@ -154,11 +154,26 @@ GPIO40 -> DS18x20 1 # D5 GPIO14 Sensor -> DS18x20 (4)
 GPIO41 -> Relay_i 1 # D0 GPIO16        -> Relay1i (29)
 
 Console:
-Var1 = Boiler
-Var2 = Outflow
-Rule1 on DS18B20-1#Temperature do Backlog Var1 %value% endon on DS18B20-2#Temperature do Var2 %value% endon on Time#Minute do Backlog if (((Var2 < 30) AND (Var1 < 30) AND (Mem1 >= 0)) OR (Mem1 > 0)) POWER1 ON elseif ((Var2 > 35) OR (Var1 > 35) OR (Mem1 < 0)) POWER1 OFF endif endon
+# Sensors mapping
+# DS18B20-3 -> Var3 = Boiler
+# DS18B20-2 -> Var2 = Outflow
+# DS18B20-3 ->      = Inflow
+
+Rule1
+on DS18B20-3#Temperature do
+  Var3 %value%
+endon
+on DS18B20-2#Temperature do
+  Var2 %value%
+endon
+on Time#Minute do
+  Backlog
+    if (((Var2 < 30) AND (Var3 < 30) AND (Mem1 >= 0)) OR (Mem1 > 0)) POWER1 ON
+    elseif ((Var2 > 35) OR (Var3 > 35) OR (Mem1 < 0)) POWER1 OFF
+    endif
+endon
 Rule1 1
-Rule2 on tele-DS18B20-3#Temperature<5 do Backlog POWER2 ON endon on tele-DS18B20-3#Temperature>10 do Backlog POWER2 OFF endon
+Rule2 on tele-DS18B20-1#Temperature<5 do Backlog POWER2 ON endon on tele-DS18B20-1#Temperature>10 do Backlog POWER2 OFF endon
 Rule2 1
 Rule3 on mqtt#connected do Backlog Subscribe BoilerHeaterEvent, evnt/sonoff-54/BoilerHeaterMode, Mem1 endon on Event#BoilerHeaterEvent do Backlog Mem1 = %value% endon
 Rule3 1
