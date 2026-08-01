@@ -67,7 +67,7 @@ Hard resetting via RTS pin...
 
 3b. Flash ESP32
 
-$ esptool --chip esp32 --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dout --flash_size detect 0x0 .pio/build/tasmota32/firmware.factory.bin && pio device monitor
+$ esptool --chip esp32 --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dout --flash_size detect 0x0 .pio/build/tasmota32/firmware.factory.bin && picocom --baud 115200 --omap crlf --echo /dev/ttyUSB0
 esptool.py v3.2
 Found 1 serial ports
 Serial port /dev/ttyUSB0
