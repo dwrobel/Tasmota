@@ -453,3 +453,28 @@ GPIO25 DS18x20  [1]
 GPIO32 Output Hi      RESET
 GPIO33 Output Hi      LED
 GPIO39 Option A [3]
+
+
+esp32-s3-2: 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
+
+Wifipower 17
+Ethtype 8
+TelePeriod 5
+
+SetOption36 0
+# Based on: https://tasmota.github.io/docs/Commands/#setoption65
+SetOption65 1
+
+# Temperature sensor resolution
+TempRes 1
+
+# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
+SetOption126 1
+
+# Time settings
+        H W M D h T
+TimeDST 0,0,3,7,2,120
+TimeSTD 0,0,10,7,3,60
+Timezone 99
+
+Reset 99
