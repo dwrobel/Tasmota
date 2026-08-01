@@ -424,7 +424,7 @@ const char HTTP_COUNTER[] PROGMEM =
   "<br><div id='t' style='text-align:center;'></div>";
 
 const char HTTP_END[] PROGMEM =
-  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://bit.ly/tasmota' target='_blank' style='color:#aaa;'>Tasmota %s (branch: dw-15.0.1.1-development-ds18x20-ext-20250703 rel: 1) %s " D_BY " Theo Arends</a></div>"
+  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://bit.ly/tasmota' target='_blank' style='color:#aaa;'>Tasmota %s (branch: dw-15.5.0.2-development-ds18x20-ext-20260731 rel: 1) %s " D_BY " Theo Arends</a></div>"
   "</div>"
   "</body>"
   "</html>";
