@@ -86,7 +86,7 @@ end
 
 r_off()
 
-Garage: ESP32s3 DevKitC-1, branch: dw-15.5.0.2-development-ds18x20-ext-20260731 rel: 1
+Garage:(.87) ESP32s3 DevKitC-1, branch: dw-15.5.0.2-development-ds18x20-ext-20260731 rel: 1
 Pin
 Header
   10  TX GPI17         -> ModBr Tx
