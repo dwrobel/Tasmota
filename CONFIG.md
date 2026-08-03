@@ -86,27 +86,27 @@ end
 
 r_off()
 
-Garage: ESP32-DevKit v1, branch: dw-14.2.0.3-development-ds18x20-ext-20240901
-Configuration/Config Module:                                Garage cable                      Basement cable
-TX GPIO1         -> ModBr Tx
-RX GPIO3         -> Modbr Rx
-IO GPIO25        -> DS18x20   [1]
-IO GPIO14        -> DS18x20   [2]
- [0] 28FFBA13761801F0 - freezer outside
- [1] 28FFA7156C1803F5 - freezer inside
-IO GPIO14        -> DS18x20   [2]
- [2] 28FFC252761801CC - hot water
- [3] 28FF810134180145 - cold water
-IO GPIO26        -> Relay_i   [3] - Control garage gate     White-Green
-IO GPIO27        -> Relay_i   [4] - Main circulating pump
-IO GPIO32        -> Relay_i   [1] - Opening main gate       Orange                            White-Green
-AO GPIO33        -> Relay_i   [2] - Closing main gate       Green
-IO GPIO12        -> Relay     [5] - DS18B20 Vdd
-                                                                                              +3V3 White-Green
-                                                                                              GND  Green
-                                                            White-Orange: Relays' common
-                                                            White-Brown & Brown: +12V
-                                                            White-Blue & Blue: GND
+Garage: ESP32s3 DevKitC-1, branch: dw-15.5.0.2-development-ds18x20-ext-20260731 rel: 1
+Pin
+Header
+  10  TX GPI17         -> ModBr Tx
+  11  RX GPI18         -> Modbr Rx
+  15  IO GPIO9         -> DS18x20   [1]
+  16  IO GPI10         -> DS18x20   [2]
+      [0] 28FFBA13761801F0 - freezer outside
+      [1] 28FFA7156C1803F5 - freezer inside
+      [2] 28FFC252761801CC - hot water
+      [3] 28FF810134180145 - cold water
+   4  IO GPIO4        -> Relay_i   [3] - Control garage gate     White-Green
+   5  IO GPIO5        -> Relay_i   [4] - Main circulating pump
+   6  IO GPIO6        -> Relay_i   [1] - Opening main gate       Orange                            White-Green
+   7  AO GPIO7        -> Relay_i   [2] - Closing main gate       Green
+  12  IO GPIO8        -> Relay     [5] - DS18B20 Vdd
+                                                                                                    +3V3 White-Green
+                                                                                                    GND  Green
+                                                                  White-Orange: Relays' common
+                                                                  White-Brown & Brown: +12V
+                                                                  White-Blue & Blue: GND
 
 Configuration/Configure MQTT
 Host              -> piwnica
@@ -114,36 +114,8 @@ Port              -> 1883
 Topic             -> garage
 Full Topic        -> %prefix%/%topic%/
 
-Console:
-# Temperature sensor resolution
-TempRes 1
+Config file: see water-pump/autoexec.bat
 
-# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
-SetOption126 1
-
-# Reset counters at TelePeriod time
-SetOption79 1
-
-WebButton1 Open main gate
-WebButton2 Close main gate
-WebButton3 Control garage gate
-WebButton4 Main circulating pump
-WebButton5 DS18B20 Vdd
-
-TelePeriod 10
-
-# Boot loop defaults restoration control.
-SetOption36 0
-# Based on: https://tasmota.github.io/docs/Commands/#setoption65
-SetOption65 1
-
-# Time settings
-        H W M D h T
-TimeDST 0,0,3,7,2,120
-TimeSTD 0,0,10,7,3,60
-Timezone 99
-
-Reset 99
 
 
 Boiler: esp8266-1 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
