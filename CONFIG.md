@@ -297,55 +297,56 @@ Timezone 99
 
 Reset 99
 
-heat-exchanger: 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
-Address 1: Heat Pump
-Address 2: L3F1946-P (DTS-1496-4P)
 
-Configuration/Config Module:
-TX GPIO1         -> ModBrTx
-RX GPIO3         -> ModBr Rx
-D1 GPIO5         -> Flowrate [1]
-D5 GPIO14        -> DS18x20  [1]
+## heat-exchanger
+### Build
+esp32s3-4: (branch: dw-15.5.0.2-development-ds18x20-ext-20260731 rel: 1)
 
-Configuration/Configure MQTT:
-Host              -> piwnica
-Port              -> 1883
-Topic             -> heat_exchanger
-Full Topic        -> %prefix%/%topic%/
+### Modbus addresses
+| Address | Device                  |
+|---------|-------------------------|
+| 1       | Heat Pump               |
+| 2       | L3F1946-P (DTS-1496-4P) |
 
-Console:
+### Configuration
+#### MQTT
+    Host              -> piwnica
+    Port              -> 1883
+    Topic             -> heat_exchanger
 
-Rule1 1
-Rule1 on System#Boot do
-  ModbusTCPStart 502;
-  ModbusBaudrate 9600;
-  ModbusSerialConfig 8N1;
-endon
+#### Config Module:
+W5500 Ethernet module as per W5500.md file
 
-TelePeriod 5
+    IO GPIO6         -> Relay    [1] DS18x20 Vdd
+    IO GPIO7         -> DS18x20  [1]
+    TX GPIO17        -> ModBr Tx
+    RX GPIO18        -> ModBr Rx
 
-SetOption36 0
-# Based on: https://tasmota.github.io/docs/Commands/#setoption65
-SetOption65 1
+#### Filesystem
+- Tasmota-berry/heat_exchanger/autoexec.bat
+- Tasmota-berry/heat_exchanger/autoexec.be
 
-# Temperature sensor resolution
-TempRes 1
+#### Cabling
+| J11 Socket         | GPIOxx  | DS18B20    | Power | RS-485 |
+|--------------------|---------|------------|-------|--------|
+|   1 - 5v+          |         |            | Red   |        |
+|   2 - 3v3 RS-485   |         |            |       | Red    |
+|   3 - Vdd DS18B20  | GPIO6   | 5 (red)    |       |        |
+|   4 - DS18B20 [1]  | GPIO7   | X (orange) |       |        |
+|   5 - Modbr Tx     | GPIO17  |            |       | Yellow |
+|   6 - Modbr Rx     | GPIO18  |            |       | Grey   |
+|   7 - GND          |         | - (yellow) |       | Black  |
+|   8 - GND          |         |            | Black |        |
 
-# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
-SetOption126 1
+### Debugging
+#### Modbus Console Test:
+    ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
 
-# Time settings
-        H W M D h T
-TimeDST 0,0,3,7,2,120
-TimeSTD 0,0,10,7,3,60
-Timezone 99
+#### Set R01 Temp:
+    ModbusSend {"deviceAddress":1, "functionCode":16, "startAddress":1158, "type":"int16","count":1, "Values":[422]}
+    Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
+    Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
 
-Reset 99
-
-# Console Test: ModbusSend {"deviceAddress":1, "functionCode":3, "startAddress":0, "type":"raw","count":2}
-# Set R01 Temp: ModbusSend {"deviceAddress":1, "functionCode":16, "startAddress":1158, "type":"int16","count":1, "Values":[422]}
-# Debug: SSerialSend5 01 03 00 00 00 06 c5 c8
-# Debug: socat -u -x /dev/ttyUSB1,raw,b9600,cs8,ospeed=b9600,ispeed=b9600 -
 
 Air-X:
 
@@ -425,28 +426,3 @@ GPIO25 DS18x20  [1]
 GPIO32 Output Hi      RESET
 GPIO33 Output Hi      LED
 GPIO39 Option A [3]
-
-
-esp32-s3-2: 15.0.1.1 (branch: dw-15.0.1-development-ds18x20-ext-20250623 rel: 1)
-
-Wifipower 17
-Ethtype 8
-TelePeriod 5
-
-SetOption36 0
-# Based on: https://tasmota.github.io/docs/Commands/#setoption65
-SetOption65 1
-
-# Temperature sensor resolution
-TempRes 1
-
-# Enable Kalman filter mean over teleperiod for JSON temperature for DS18x20 sensors
-SetOption126 1
-
-# Time settings
-        H W M D h T
-TimeDST 0,0,3,7,2,120
-TimeSTD 0,0,10,7,3,60
-Timezone 99
-
-Reset 99
